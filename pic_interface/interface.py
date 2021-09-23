@@ -52,6 +52,8 @@ def try_to_lock_experiment(config_json, serial_port):
     print(pic_message)
     print("\-------- --------/\n")
     match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
+    print(config_json['id'])
+    print(match.group("exp_name"))
     if match.group("exp_name") == config_json['id']:
         #LOG_INFO
         print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
