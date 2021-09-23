@@ -1,19 +1,10 @@
 #!/usr/bin/python3
 
-from time import sleep
 import serial
 import json
 import re
-import random
-import math 
-  
 
 serial_port = None
-size = None
-n_points = None
-frist = 1
-i = 1
-total_in = 0
 #status, config
 
 def print_serial():
@@ -27,29 +18,28 @@ def print_serial():
 
 def receive_data_from_exp():
     global serial_port
-    global frist 
-    global i 
-    global total_in
-    if frist == 1:
-        frist =0
+
+    print("A PROCURA DE INFO NA PORTA SERIE\n")
+    pic_message = serial_port.read_until(b'\r')
+    pic_message = pic_message.decode(encoding='ascii')
+    print("MENSAGEM DO PIC:\n")
+    print(pic_message)
+    print("\-------- --------/\n")
+    if "DAT" in pic_message:
+        print("ENCONTREI INFO\nEXPERIENCIA COMECOU")
         return "DATA_START"
-    if int(i) > int(n_points):
-        sleep(0.01)
-        print("Pi: %lf"%(float(total_in)*4/float(n_points)))
+    elif "END" in pic_message:
+        print("ENCONTREI INFO\nEXPERIENCIA ACABOU")
         return "DATA_END"
-    sleep(0.01)
-    
-    x = random.random()*float(size)
-    y = random.random()*float(size)
-    if math.sqrt(x*x+y*y) <=int(size):
-        c_in = 1
-        total_in = total_in + 1
     else:
-        c_in = 0
-    pic_message = '{"Sample_number":"'+str(i)+'","eX":"'+str(x)+'","eY":"'+str(y)+'","circ":"'+str(c_in)+'"}'
-    # print (i)
-    i=i+1
-    return pic_message
+        #1       3.1911812       9.7769165       21.2292843      25.72
+        print("ENCONTREI INFO\nDADOS NA PORTA")
+        pic_message = pic_message.strip()
+        pic_message = pic_message.split("\t")
+        pic_message = '{"Sample_number":"'+str(pic_message[0])+\
+            '","Val1":"'+str(pic_message[1])+'","Val2":"'+str(pic_message[2])+\
+            '","Val3":"'+str(pic_message[3])+'","Val4":"'+str(pic_message[4])+'"}'
+        return pic_message
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(config_json, serial_port):
@@ -84,47 +74,96 @@ def try_to_lock_experiment(config_json, serial_port):
 #e escrever detalhes no log do sistema
 def do_init(config_json):
     global serial_port
-    
-    if 'test_rpi' in config_json:
-        print("Isto é uma função de teste!\n")
-        return True
+
+    if 'serial_port' in config_json:
+        for exp_port in config_json['serial_port']['ports_restrict']:
+            print("A tentar abrir a porta"+exp_port+"\n")
+            try:
+                #alterar esta função para aceitar mais definições do json
+                #é preciso uma função para mapear os valores para as constantes da porta série
+                #e.g. - 8 bits de data -> serial.EIGHTBITS; 1 stopbit -> serial.STOPBITS_ONE
+                serial_port = serial.Serial(port = exp_port,\
+                                                    baudrate=int(config_json['serial_port']['baud']),\
+                                                    timeout = int(config_json['serial_port']['death_timeout']))
+            except serial.SerialException:
+                #LOG_WARNING: couldn't open serial port exp_port. Port doesnt exist or is in use
+                pass
+            else:
+                if try_to_lock_experiment(config_json, serial_port) :
+                    break
+                else:
+                    serial_port.close()
+        
+        if serial_port.is_open :
+            #LOG_INFO : EXPERIMENT FOUND. INITIALIZING EXPERIMENT
+            print("Consegui abrir a porta e encontrar a experiencia\n")
+            #Mudar para números. Return 0 e mandar status
+            return True
+        else:
+            #SUBSTITUIR POR LOG_ERROR : couldn't find the experiment in any of the configured serial ports
+            print("Nao consegui abrir a porta e encontrar a experiencia\n")
+            #return -1
+            return False
     else:
         #LOG_ERROR - Serial port not configured on json.
         #return -2
-        print("Falta serial config!\n")
         return False
 
 def do_config(config_json) :
     global serial_port
 
-    global size
-    global n_points
-    
-
-    print(config_json)
-    size = config_json["config_params"]["R"]
-    n_points = config_json["config_params"]["Iteration"]
-
-    print("Size :")
-    print(size)
-    print("\n")
-    print("Numbero de pontos :")
-    print(n_points)
-
-
-    return  config_json,True
-
+    cmd ="cfg\t"+str(config_json["config_params"]["deltaX"])+"\t"+str(config_json["config_params"]["samples"])+"\r"
+    cmd = cmd.encode(encoding="ascii")
+    #Deita fora as mensagens recebidas que não
+    #interessam
+    serial_port.reset_input_buffer()
+    serial_port.write(cmd)
+    print("A tentar configurar experiência")
+    while True :
+        pic_message = serial_port.read_until(b'\r')
+        print("MENSAGEM DO PIC DE CONFIGURACAO:\n")
+        print(pic_message.decode(encoding='ascii'))
+        print("\-------- --------/\n")
+        if "CFG" in pic_message.decode(encoding='ascii') :
+            pic_message = pic_message.decode(encoding='ascii')
+            #Remover os primeiros 4 caracteres para tirar o "CFG\t" 
+            pic_message = pic_message[4:]
+            pic_message = pic_message.replace("\t"," ")
+            break
+        elif re.search(r"(STOPED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            return -1,False
+    status_confirmation = serial_port.read_until(b'\r')
+    status_confirmation = status_confirmation.decode(encoding='ascii')
+    print("MENSAGEM DO PIC A CONFIRMAR CFGOK:\n")
+    print(status_confirmation)
+    print("\-------- --------/\n")
+    if "CFGOK" in status_confirmation:
+        return pic_message, True
+    else:
+        return -1, False
 
 def do_start() :
     global serial_port
-    global frist
-    global i
-    global total_in
-    total_in = 0 
-    i = 1
-    frist = 1
 
-    return True
+    print("A tentar comecar a experiencia\n")
+    cmd = "str\r"
+    cmd = cmd.encode(encoding='ascii')
+    serial_port.reset_input_buffer()
+    serial_port.write(cmd)
+    while True :
+        pic_message = serial_port.read_until(b'\r')
+        print("MENSAGEM DO PIC A CONFIRMAR STROK:\n")
+        print(pic_message.decode(encoding='ascii'))
+        print("\-------- --------/\n")
+        if "STROK" in pic_message.decode(encoding='ascii') :
+            return True
+        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            return False
+        #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
+        #    return False
+        #Aqui não pode ter else: false senão rebenta por tudo e por nada
+        #tem de se apontar aos casos especificos -_-
+    
 
 def do_stop() :
     global serial_port
