@@ -147,7 +147,7 @@ def main_cycle():
             if ("config_params" in next_execution.keys()) and (not Working):
                 save_execution =next_execution.get("config_params",None)
                 if save_execution != None:
-                    print(type(save_execution))
+                    print(json.dumps(save_execution))
                 # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
                 status_config=Send_Config_to_Pic(save_execution)
                 if test:
