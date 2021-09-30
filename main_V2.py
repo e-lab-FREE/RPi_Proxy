@@ -149,7 +149,7 @@ def main_cycle():
                 if save_execution != None:
                     print(json.dumps(save_execution))
                 # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
-                status_config=Send_Config_to_Pic(save_execution)
+                    status_config=Send_Config_to_Pic(next_execution)
                 if test:
                     print("O valor do Working é: "+str(Working))
             # pass
