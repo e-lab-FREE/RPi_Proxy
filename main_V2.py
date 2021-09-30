@@ -6,14 +6,14 @@ import threading
 import time
 lock = threading.Lock()
 
-SERVER = "194.210.159.33"
+SERVER = "194.210.159.84"
 # SERVER = "10.2.0.6"
 
 PORT = "8000"
 FORMAT = 'utf-8'
 
-APPARATUS_ID = "2"
-EXPERIMENT_ID = "3"
+APPARATUS_ID = "4"
+EXPERIMENT_ID = "4"
 
 CONFIG_OF_EXP = []
 next_execution = {}
@@ -146,6 +146,8 @@ def main_cycle():
             time.sleep(0.5)
             if ("config_params" in next_execution.keys()) and (not Working):
                 save_execution =next_execution.get("config_params",None)
+                if save_execution != None:
+                    print(type(save_execution))
                 # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
                 status_config=Send_Config_to_Pic(save_execution)
                 if test:
