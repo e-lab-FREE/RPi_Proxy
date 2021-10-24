@@ -103,8 +103,8 @@ def GetConfig():
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+SERVER+":"+PORT+"/api/v1/getexecution/"+APPARATUS_ID
-    response =  requests.get(api_url)
+    api_url = "http://"+SERVER+":"+PORT+"/api/v1/apparatus/"+APPARATUS_ID+"/nextexecution"
+    response =  requests.get(api_url,headers = HEADERS)
     next_execution = response.json()
     if (test_end_point_print):
         print("REQUEST\n")
@@ -150,8 +150,8 @@ def main_cycle():
                     print("\n\nIsto_1 :")
                     print (next_execution)
             time.sleep(0.5)
-            if ("config_params" in next_execution.keys()) and (not Working):
-                save_execution =next_execution.get("config_params",None)
+            if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
+                save_execution =next_execution.get("config",None)
                 if save_execution != None:
                     print(json.dumps(save_execution))
                 # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
