@@ -4,22 +4,18 @@ from datetime import datetime
 import importlib
 import threading
 import time
+import configparser
+
 lock = threading.Lock()
 
-SERVER = "194.210.159.84"
-# SERVER = "10.2.0.6"
+config = configparser.ConfigParser()
+config.sections()
 
-PORT = "8000"
 FORMAT = 'utf-8'
-
-APPARATUS_ID = "4"
-EXPERIMENT_ID = "4"
 
 CONFIG_OF_EXP = []
 next_execution = {}
 status_config= {}
-MY_IP = "192.168.1.83"
-SEGREDO = "sou eu"
 SAVE_DATA = []
 
 test =False
@@ -30,7 +26,7 @@ Waiting_for_config = True
 interface = None
 
 HEADERS = { 
-  "Authentication": "Secret "+SEGREDO, 
+  "Authentication": "Secret "+config['DEFAULT']['SECRET'], 
   "Content-Type": "application/json"
 }
 
@@ -93,8 +89,8 @@ def Send_Config_to_Pic(myjson):
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+SERVER+":"+PORT+"/api/v1/apparatus/"+APPARATUS_ID
-    msg = {"secret":SEGREDO}
+    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']
+    # msg = {"secret":SEGREDO}
     response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
     CONFIG_OF_EXP = response.json()["experiment"]
     if (test_end_point_print):
@@ -103,8 +99,11 @@ def GetConfig():
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+SERVER+":"+PORT+"/api/v1/apparatus/"+APPARATUS_ID+"/nextexecution"
+    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']+"/nextexecution"
     response =  requests.get(api_url,headers = HEADERS)
+    print(response.json())
+
+
     next_execution = response.json()
     if (test_end_point_print):
         print("REQUEST\n")
@@ -117,7 +116,7 @@ def SendPartialResult(msg):
     # print(next_execution)
     print(str(msg))
 
-    api_url = "http://"+SERVER+":"+PORT+"/api/v1/result"
+    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/result"
     print(api_url)
     # todo = {"value":{"ok":"ola","ponto":"oco"},"time":datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),"result_type":"p"}
     print("Aqui:  " ,json.dumps(msg,indent=4))
@@ -172,7 +171,7 @@ if __name__ == "__main__":
     while True:
         # try:
         GetConfig()
-        if interface.do_init(CONFIG_OF_EXP["config"]) :
+        if True: #if interface.do_init(CONFIG_OF_EXP["config"]) :
             main_cycle()
         else:
             print ("Experiment not found")
