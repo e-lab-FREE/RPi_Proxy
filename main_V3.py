@@ -8,7 +8,8 @@ import configparser
 
 lock = threading.Lock()
 
-config = configparser.ConfigParser('server_info.ini')
+config = configparser.ConfigParser()
+config.read('server_info.ini')
 
 FORMAT = 'utf-8'
 
