@@ -175,7 +175,7 @@ if __name__ == "__main__":
     while True:
         # try:
         GetConfig()
-        if True: #if interface.do_init(CONFIG_OF_EXP["config"]) :
+        if interface.do_init(CONFIG_OF_EXP["config"]) :
             main_cycle()
         else:
             print ("Experiment not found")
