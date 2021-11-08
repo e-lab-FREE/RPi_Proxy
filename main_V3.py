@@ -8,8 +8,7 @@ import configparser
 
 lock = threading.Lock()
 
-config = configparser.ConfigParser()
-config.sections()
+
 
 FORMAT = 'utf-8'
 
@@ -168,6 +167,7 @@ if __name__ == "__main__":
     # global next_execution
     connected = None
     interface = importlib.import_module("pic_interface.interface")
+    config = configparser.ConfigParser()
     while True:
         # try:
         GetConfig()
