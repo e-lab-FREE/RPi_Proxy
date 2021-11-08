@@ -8,27 +8,33 @@ import time
 
 interface = None
 
-HEADER = 64
+HEADER = 2048
 PORT = 5050
 BINARY_DATA_PORT = 5051
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.1.102"
+SERVER = "10.7.0.1"
 ADDR = (SERVER, PORT)
 
 CONFIG_OF_EXP = []
-MY_IP = "192.168.1.83"
-SEGREDO = "estou bem"
+MY_IP = "10.7.0.35"
+SEGREDO = "sou eu"
 SAVE_DATA = []
+lock = threading.Lock()
 
-def send_exp_data():
+def send_exp_data(lock):
     global SAVE_DATA
     while interface.receive_data_from_exp() != "DATA_START":
         pass
     send_message = '{"msg_id":"11","timestamp":"'+str(time.time_ns())+'","status":"Experiment Starting","Data":""}'
+    time.sleep(0.00001)
+    lock.acquire()
+    lock.release()
     send(send_message)
     while True:
+        # print("Erro esta na interface")
         exp_data = interface.receive_data_from_exp()
+        print("Exp_data: ")
         print(exp_data)
         if exp_data != "DATA_END":
             SAVE_DATA.append('{"timestamp":"'+str(time.time_ns())+'","Data":'+str(exp_data)+'}')
@@ -37,9 +43,14 @@ def send_exp_data():
         else:
             send_message = '{"msg_id":"11","timestamp":"'+str(time.time_ns())+'","status":"Experiment Ended","Data":""}'
             send(send_message)
-            send_message = '{"msg_id":"7", "results":'+str(SAVE_DATA).replace('\'', '')+'}'
+            # Bug aqui em baixo.
+            send_message = '{"msg_id":"7", "results":'+str(SAVE_DATA).replace('\'', '').replace('\\n', '').replace('\\r', '')+'}'
+            print(send_message)
             send(send_message)
-            return #EXPERIMENT ENDED; END THREAD
+            SAVE_DATA = []
+            break 
+    print("I'm done")
+    return #EXPERIMENT ENDED; END THREAD
 
 
 def check_reply(myjson):
@@ -75,29 +86,39 @@ def wait_for_messages():
 
 
 def send(msg):
+    # global lock
     try:
+        msg = msg.replace('\n','').replace('\r','').replace('::',':')
         message = msg.encode(FORMAT)
+        print("Mensagem a enviar para o main "+str(message))
         msg_length = len(message)
+        print("Tamanho da mensagem "+str(msg_length))
         send_length = str(msg_length).encode(FORMAT)
         send_length += b' ' * (HEADER - len(send_length))
         client.sendall(send_length)
         #print (send_length)
         #print (message)
         client.sendall(message)
+        try:
+            lock.release()
+            print("consegui dar unlock")
+        except:
+            print("não conseguir dar unlock")
     except socket.error:
         raise socket.error
 
 #erro aqui 
 def Send_Config_to_Pid(myjson):
+    # global lock
     print("Recebi mensagem de configurestart. A tentar configurar pic")
     actual_config, config_feita_correcta = interface.do_config(myjson)
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
-        data_thread = threading.Thread(target=send_exp_data,daemon=True)
+        data_thread = threading.Thread(target=send_exp_data,args=(lock,),daemon=True)
         print("PIC configurado.\n")
         if interface.do_start():                            #tentar começar experiencia
             print("aqui")
             data_thread.start()
-            time.sleep(0.000001)
+            lock.acquire()
             #O JSON dos config parameters está mal e crasha o server. ARRANJAR
             #send_mensage = '{"reply_id": "2","status":"Experiment Running","config_params":"'+str(myjson["config_params"])+'}'
             send_mensage = '{"reply_id": "2","status":"Experiment Running"}'
@@ -107,6 +128,27 @@ def Send_Config_to_Pid(myjson):
     else:
         send_mensage = '{"reply_id": "2", "error":"-2", "status":"Experiment could not be configured"}'
     return send_mensage
+
+# def Send_Action_to_Valv(myjson):
+#     # global lock
+#     print("Recebi mensagem de configurestart. A tentar configurar pic")
+#     actual_config, config_feita_correcta = interface.do_config(myjson)
+#     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
+#         data_thread = threading.Thread(target=send_exp_data,args=(lock,),daemon=True)
+#         print("PIC configurado.\n")
+#         if interface.do_start():                            #tentar começar experiencia
+#             print("aqui")
+#             data_thread.start()
+#             lock.acquire()
+#             #O JSON dos config parameters está mal e crasha o server. ARRANJAR
+#             #send_mensage = '{"reply_id": "2","status":"Experiment Running","config_params":"'+str(myjson["config_params"])+'}'
+#             send_mensage = '{"reply_id": "2","status":"Experiment Running"}'
+#         else :
+#             send_mensage = '{"reply_id": "2", "error":"-1", "status":"Experiment could not start"}'
+    
+#     else:
+#         send_mensage = '{"reply_id": "2", "error":"-2", "status":"Experiment could not be configured"}'
+#     return send_mensage
 
 
 def check_msg(myjson):
@@ -171,6 +213,14 @@ def check_msg(myjson):
             else:
                 send_mensage = '{"reply_id": "5", "error":"-1","status":"ERROR. Couldn\'t get status"}'
             send(send_mensage)
+        elif( msg_id == 12):
+            print("Recebi mensagem de status. A chamar interface do PIC")
+            print(str(myjson['action']))
+            if interface.action_valv(str(myjson['action'])) :
+                send_mensage = '{"reply_id": "12","status":"Success. Depois aparece aqui o status"}'
+            else:
+                send_mensage = '{"reply_id": "12", "error":"-1","status":"ERROR. Couldn\'t get status"}'
+            send(send_mensage)
         else:
             pass
 
@@ -234,3 +284,7 @@ if __name__ == "__main__":
                 connected = False
             client.close()
             time.sleep(10)
+
+
+# Arduino_Temp cfg R:5 I:5
+# Arduino_Temp stp
