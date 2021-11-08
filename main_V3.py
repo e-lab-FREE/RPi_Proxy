@@ -53,10 +53,10 @@ def send_exp_data():
         if exp_data != "DATA_END":
             
             SAVE_DATA.append(exp_data)
-            send_message = {"execution":int(next_execution["execution_id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
+            send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
             SendPartialResult(send_message)
         else:
-            send_message = {"execution":int(next_execution["execution_id"]),"value":SAVE_DATA,"result_type":"f"}
+            send_message = {"execution":int(next_execution["id"]),"value":SAVE_DATA,"result_type":"f"}
             SendPartialResult(send_message)
             Working = False
             next_execution = {}
