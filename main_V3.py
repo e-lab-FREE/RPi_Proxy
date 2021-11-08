@@ -26,7 +26,7 @@ Waiting_for_config = True
 interface = None
 
 HEADERS = { 
-  "Authentication": "Secret "+config['DEFAULT']['SECRET'], 
+  "Authentication": str(config['DEFAULT']['SECRET']), 
   "Content-Type": "application/json"
 }
 
