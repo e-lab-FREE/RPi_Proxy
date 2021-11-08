@@ -114,7 +114,7 @@ def do_init(config_json):
 def do_config(config_json) :
     global serial_port
 
-    cmd ="cfg\t"+str(config_json["config_params"]["deltaX"])+"\t"+str(config_json["config_params"]["samples"])+"\r"
+    cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
     cmd = cmd.encode(encoding="ascii")
     #Deita fora as mensagens recebidas que não
     #interessam
