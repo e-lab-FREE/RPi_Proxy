@@ -173,17 +173,17 @@ if __name__ == "__main__":
     connected = None
     interface = importlib.import_module("pic_interface.interface")
     while True:
-        # try:
-        GetConfig()
-        if interface.do_init(CONFIG_OF_EXP["config"]) :
-            main_cycle()
-        else:
-            print ("Experiment not found")
-        # except:
-        #     #LOG ERROR
-        #     print("Faill to connect to the Server. Trying again after 10 s")
-        #     #So faz shutdown do socket se este chegou a estar connected
-        #     time.sleep(10)
+        try:
+            GetConfig()
+            if interface.do_init(CONFIG_OF_EXP["config"]) :
+                main_cycle()
+            else:
+                print ("Experiment not found")
+        except:
+            #LOG ERROR
+            print("Faill to connect to the Server. Trying again after 10 s")
+            #So faz shutdown do socket se este chegou a estar connected
+            time.sleep(10)
 
 
 
