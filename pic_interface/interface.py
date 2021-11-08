@@ -118,7 +118,7 @@ def do_config(config_json) :
     cmd = cmd.encode(encoding="ascii")
     #Deita fora as mensagens recebidas que não
     #interessam
-    serial_port.reset_input_buffer()
+    serial_port.flushInput()
     serial_port.write(cmd)
     print("A tentar configurar experiência")
     while True :
