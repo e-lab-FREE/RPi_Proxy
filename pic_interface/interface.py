@@ -20,8 +20,11 @@ def receive_data_from_exp():
     global serial_port
 
     print("A PROCURA DE INFO NA PORTA SERIE\n")
-    pic_message = serial_port.read_until(b'\r')
-    pic_message = pic_message.decode(encoding='ascii')
+    try:
+        pic_message = serial_port.read_until(b'\r')
+        pic_message = pic_message.decode(encoding='ascii')
+    except:
+        print("TODO: send error to server, pic is not conected")
     print("MENSAGEM DO PIC:\n")
     print(pic_message)
     print("\-------- --------/\n")
@@ -45,12 +48,15 @@ def receive_data_from_exp():
 def try_to_lock_experiment(serial_port):
     #LOG_INFO
     print("AH PROCURA DO PIC NA PORTA SERIE")
-    pic_message = serial_port.read_until(b'\r')
-    pic_message = pic_message.decode(encoding='ascii')
-    pic_message = pic_message.strip()
-    print("MENSAGEM DO PIC:\n")
-    print(pic_message)
-    print("\-------- --------/\n")
+    try:
+        pic_message = serial_port.read_until(b'\r')
+        pic_message = pic_message.decode(encoding='ascii')
+        pic_message = pic_message.strip()
+        print("MENSAGEM DO PIC:\n")
+        print(pic_message)
+        print("\-------- --------/\n")
+    except:
+        print("TODO: send error to server, pic is not conected")
     if (pic_message != None):
         return True
     else:
@@ -118,9 +124,11 @@ def do_init(config_json):
 
 def do_config(config_json) :
     global serial_port
-
-    cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
-    cmd = cmd.encode(encoding="ascii")
+    try:
+        cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
+        cmd = cmd.encode(encoding="ascii")
+    except:
+        print("TODO: send error to server, pic is not conected")
     #Deita fora as mensagens recebidas que não
     #interessam
     serial_port.reset_input_buffer()
