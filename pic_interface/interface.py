@@ -19,24 +19,24 @@ def print_serial():
 def receive_data_from_exp():
     global serial_port
 
-    print("A PROCURA DE INFO NA PORTA SERIE\n")
+    print("SEARCHING FOR INFO IN THE SERIE PORT\n")
     try:
         pic_message = serial_port.read_until(b'\r')
         pic_message = pic_message.decode(encoding='ascii')
     except:
         print("TODO: send error to server, pic is not conected")
-    print("MENSAGEM DO PIC:\n")
+    print("MENSAGE FORM PIC:\n")
     print(pic_message)
     print("\-------- --------/\n")
     if "DAT" in pic_message:
-        print("ENCONTREI INFO\nEXPERIENCIA COMECOU")
+        print("INFO FOUND\nEXPERIMENTE STARTED")
         return "DATA_START"
     elif "END" in pic_message:
-        print("ENCONTREI INFO\nEXPERIENCIA ACABOU")
+        print("INFO FOUND\nEXPERIMENTE ENDED")
         return "DATA_END"
     else:
         #1       3.1911812       9.7769165       21.2292843      25.72
-        print("ENCONTREI INFO\nDADOS NA PORTA")
+        print("INFO FOUND\nDATA SEND TO THE SERVER")
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
         pic_message = '{"Sample_number":"'+str(pic_message[0])+\
@@ -47,12 +47,12 @@ def receive_data_from_exp():
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(serial_port):
     #LOG_INFO
-    print("AH PROCURA DO PIC NA PORTA SERIE")
+    print("SEARCHING FOR THE PIC IN THE SERIE PORT")
     try:
         pic_message = serial_port.read_until(b'\r')
         pic_message = pic_message.decode(encoding='ascii')
         pic_message = pic_message.strip()
-        print("MENSAGEM DO PIC:\n")
+        print("PIC MENSAGE:\n")
         print(pic_message)
         print("\-------- --------/\n")
     except:
@@ -89,7 +89,7 @@ def do_init(config_json):
 
     if 'serial_port' in config_json:
         for exp_port in config_json['serial_port']['ports_restrict']:
-            print("A tentar abrir a porta"+exp_port+"\n")
+            print("TRYING TO OPEN THE SERIAL PORT: "+exp_port+"\n")
             try:
                 #alterar esta função para aceitar mais definições do json
                 #é preciso uma função para mapear os valores para as constantes da porta série
@@ -109,12 +109,12 @@ def do_init(config_json):
         
         if serial_port.is_open :
             #LOG_INFO : EXPERIMENT FOUND. INITIALIZING EXPERIMENT
-            print("Consegui abrir a porta e encontrar a experiencia\n")
+            print("I FOUND THE SERIAL PORT\n")
             #Mudar para números. Return 0 e mandar status
             return True
         else:
             #SUBSTITUIR POR LOG_ERROR : couldn't find the experiment in any of the configured serial ports
-            print("Nao consegui abrir a porta e encontrar a experiencia\n")
+            print("I COULDN'T OPEN THE DOOR AND FIND THE EXPERIENCE\n")
             #return -1
             return False
     else:
