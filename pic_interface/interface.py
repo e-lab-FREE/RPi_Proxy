@@ -42,7 +42,7 @@ def receive_data_from_exp():
         return pic_message
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
-def try_to_lock_experiment(config_json, serial_port):
+def try_to_lock_experiment(serial_port):
     #LOG_INFO
     print("AH PROCURA DO PIC NA PORTA SERIE")
     pic_message = serial_port.read_until(b'\r')
@@ -51,23 +51,27 @@ def try_to_lock_experiment(config_json, serial_port):
     print("MENSAGEM DO PIC:\n")
     print(pic_message)
     print("\-------- --------/\n")
-    match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
-    print(config_json['id'])
-    print(match.group("exp_name"))
-    if match.group("exp_name") == config_json['id']:
-        #LOG_INFO
-        print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
-        if match.group("exp_state") == "STOPED":
-            return True
-        else:
-            if do_stop():
-                return True
-            else:
-                return False
+    if (pic_message != None):
+        return True
     else:
-        #LOG INFO
-        print("NAO ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
         return False
+    # match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
+    # print(config_json['id'])
+    # print(match.group("exp_name"))
+    # if match.group("exp_name") == config_json['id']:
+    #     #LOG_INFO
+    #     print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
+    #     if match.group("exp_state") == "STOPED":
+    #         return True
+    #     else:
+    #         if do_stop():
+    #             return True
+    #         else:
+    #             return False
+    # else:
+    #     #LOG INFO
+    #     print("NAO ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
+    #     return False
 
 #DO_INIT - Abre a ligacao com a porta serie
 #NOTAS: possivelmente os returns devem ser jsons com mensagens de erro
@@ -89,9 +93,10 @@ def do_init(config_json):
                                                     timeout = int(config_json['serial_port']['death_timeout']))
             except serial.SerialException:
                 #LOG_WARNING: couldn't open serial port exp_port. Port doesnt exist or is in use
+                print("ERRO: Could not open serial port!!")
                 pass
             else:
-                if try_to_lock_experiment(config_json, serial_port) :
+                if try_to_lock_experiment(serial_port) :
                     break
                 else:
                     serial_port.close()
