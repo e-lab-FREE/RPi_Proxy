@@ -57,27 +57,23 @@ def try_to_lock_experiment(serial_port):
         print("\-------- --------/\n")
     except:
         print("TODO: send error to server, pic is not conected")
-    if (pic_message != None):
-        return True
+    match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
+    print(config_json['id'])
+    print(match.group("exp_name"))
+    if match.group("exp_name") == config_json['id']:
+        #LOG_INFO
+        print("PIC FOUND ON THE SERIAL PORT")
+        if match.group("exp_state") == "STOPED":
+            return True
+        else:
+            if do_stop():
+                return True
+            else:
+                return False
     else:
+        #LOG INFO
+        print("PIC NOT FOUND ON THE SERIAL PORT")
         return False
-    # match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
-    # print(config_json['id'])
-    # print(match.group("exp_name"))
-    # if match.group("exp_name") == config_json['id']:
-    #     #LOG_INFO
-    #     print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
-    #     if match.group("exp_state") == "STOPED":
-    #         return True
-    #     else:
-    #         if do_stop():
-    #             return True
-    #         else:
-    #             return False
-    # else:
-    #     #LOG INFO
-    #     print("NAO ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
-    #     return False
 
 #DO_INIT - Abre a ligacao com a porta serie
 #NOTAS: possivelmente os returns devem ser jsons com mensagens de erro
