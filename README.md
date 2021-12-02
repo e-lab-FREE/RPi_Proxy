@@ -3,6 +3,36 @@ This is a simple proxy that communicate with the main server.
 
 ## Requirements
 
+Install the following:
+
+```
+sudo apt-get install gstreamer1.0-tools
+```
+```
+sudo apt-get install gstreamer1.0-plugins-good
+```
+```
+sudo apt-get install gstreamer1.0-plugins-bad
+```
+```
+sudo apt-get install gstreamer1.0-plugins-ugly
+```
+```
+sudo apt-get install gstreamer1.0-plugins-base
+```
+```
+sudo apt install python3
+```
+```
+sudo apt install python3-pip
+```
+```
+sudo  apt-get install git
+```
+```
+pip3 install pyserial
+```
+
 ## How to connect to [FREE_Web](https://github.com/e-lab-FREE/FREE_Web)
 To be able to comunicate with your main server, you need to change the configuration of the proxy you need to edit the following file:
 
@@ -32,6 +62,15 @@ video_frame=30/1
 killall gst-launch-1.0
 gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame ! clockoverlay time-format="%x - %X" ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink host=$video_server port=$video_port async=false 
 ```
+Some usefull comands:
+```
+v4l2-ctl --list-devices
+```
+```
+v4l2-ctl -d /dev/video2 --list-formats-ext
+```
+
+
 ## About
 
 
