@@ -39,7 +39,8 @@ But anyone can change the interface.py and this proxy can do all kandies of expe
      ...
      return results # JSON
      
- # where the config_json will be a JSON that was the information of the controlor of the experiment so the RPi can comunicate to it  
+ #  Where the config_json will be a JSON that was the information of the controlor of 
+ # the experiment so the RPi can comunicate to it  
  def do_init(config_json): 
      ...
      return True/False 
