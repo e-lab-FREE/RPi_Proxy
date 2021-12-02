@@ -49,7 +49,7 @@ EXPERIMENT_ID = 1
 SECRET = test_1
 ```
 
-*  `strat-video.sh` - change the video_server and video_port with the info of your video server (with janus installed). Also cahnge the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camare.
+*  `strat-video.sh` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camare.
 
 
 ```sh
