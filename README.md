@@ -4,7 +4,11 @@ This is a simple proxy that communicate with the main server.
 ## Requirements
 
 Install the following:
+```
+sudo  apt-get install git
+```
 
+For the video stream:
 ```
 sudo apt-get install gstreamer1.0-tools
 ```
@@ -20,14 +24,12 @@ sudo apt-get install gstreamer1.0-plugins-ugly
 ```
 sudo apt-get install gstreamer1.0-plugins-base
 ```
+For the Proxy it self:
 ```
 sudo apt install python3
 ```
 ```
 sudo apt install python3-pip
-```
-```
-sudo  apt-get install git
 ```
 ```
 pip3 install pyserial
