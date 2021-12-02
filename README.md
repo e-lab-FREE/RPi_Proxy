@@ -1,4 +1,4 @@
-# RPi_Proxy
+# RPi Proxy
 This is a simple proxy that communicate with the main server. 
 
 ## Requirements
