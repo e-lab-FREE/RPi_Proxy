@@ -1,5 +1,9 @@
 # RPi_Proxy
 This is a simple proxy that communicate with the main server. 
+
+## Requirements
+
+## How to install
 To be able to comunicate with your main server, you need to change the configuration of the proxy you need to edit the following file:
 
 * `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, EXPERIMENT_ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
