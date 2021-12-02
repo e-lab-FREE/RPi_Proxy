@@ -35,33 +35,38 @@ This RPi Proxy it was devoloped to the project World Pendulum, and for it the in
 But anyone can change the interface.py and this proxy can do all kandies of experiment the only this is requested to the user to be careful is to not modify the name of the following function:  
 
 ```python3
+# Reads the data sent by the controller after an experiment was initiated
  def  receive_data_from_exp():
      ...
      return results # JSON
      
- #  Where the config_json will be a JSON that was the information of the controlor of 
- # the experiment so the RPi can comunicate to it  
+ #  Where the config json will be a JSON that was the information of the controlor of 
+ # the experiment so the RPi can communicate to it
  def do_init(config_json): 
      ...
      return True/False 
     
- # the config_json is the configuration given by the user that he/she wants to execute 
+ # The config_json is the configuration given by the user that he/she wants to execute 
  def do_config(config_json) :
      ...
      return True/False
-     
+ 
+ # Strats the experiment 
  def do_start() :
      ...
      return True/False 
-     
+
+ # Stops the experiment
  def do_stop() :
       ...
      return True/False
      
+ # Rests the experiment    
  def do_reset() :
       ...
      return True/False
-     
+ 
+ # Gets the information about the experiment (sensors)
  def get_status():
       ...
      return status
