@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 import serial
 import json
 import re
@@ -19,50 +20,52 @@ def print_serial():
 def receive_data_from_exp():
     global serial_port
 
-    print("SEARCHING FOR INFO IN THE SERIE PORT\n")
-    try:
-        pic_message = serial_port.read_until(b'\r')
-        pic_message = pic_message.decode(encoding='ascii')
-    except:
-        print("TODO: send error to server, pic is not conected")
-    print("MENSAGE FORM PIC:\n")
+    print("A PROCURA DE INFO NA PORTA SERIE\n")
+    pic_message = serial_port.read_until(b'\r')
+    pic_message = pic_message.decode(encoding='ascii')
+    print("MENSAGEM DO PIC:\n")
     print(pic_message)
     print("\-------- --------/\n")
     if "DAT" in pic_message:
-        print("INFO FOUND\nEXPERIMENTE STARTED")
+        print("ENCONTREI INFO\nEXPERIENCIA COMECOU")
         return "DATA_START"
     elif "END" in pic_message:
-        print("INFO FOUND\nEXPERIMENTE ENDED")
+        print("ENCONTREI INFO\nEXPERIENCIA ACABOU")
         return "DATA_END"
     else:
-        #1       3.1911812       9.7769165       21.2292843      25.72
-        print("INFO FOUND\nDATA SEND TO THE SERVER")
+        """ AQUI SÃO OS OUTPUTS DA EXPERIÊNÇIA JÁ CONVERTIDOS
+               adc_value1       adc_value2       adc_Value3
+        Linear function in the form f(x) = slope*x + offset
+        adc_Value1: tension ( f(V) =  0.132088*adc_value1 + 66.383)  
+        adc_Value2: current ( f(A) =  0.327324*adc_value2 + 36)  
+        adc_Value3: pressure gauge value
+        """
+        print("ENCONTREI INFO\nDADOS NA PORTA")
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
-        pic_message = '{"Sample_number":"'+str(pic_message[0])+\
-            '","Val1":"'+str(pic_message[1])+'","Val2":"'+str(pic_message[2])+\
-            '","Val3":"'+str(pic_message[3])+'","Val4":"'+str(pic_message[4])+'"}'
+        pic_message = '{"adc_value1":"'+str(0.132088*pic_message[0] + 66.383)+\
+            '","adc_value2":"'+str(0.327324 * pic_message[1] + 36)+\
+            '","adc_value3":"'+str(pic_message[2])+'"}'
         return pic_message
+        # pode ser que tem que adcionar mais parametros como: sample number, Date, time, millesecond, erros das variáveis (tensão, corrente e pressão)
+
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
-def try_to_lock_experiment(serial_port):
+def try_to_lock_experiment(config_json, serial_port):
     #LOG_INFO
-    print("SEARCHING FOR THE PIC IN THE SERIE PORT")
-    try:
-        pic_message = serial_port.read_until(b'\r')
-        pic_message = pic_message.decode(encoding='ascii')
-        pic_message = pic_message.strip()
-        print("PIC MENSAGE:\n")
-        print(pic_message)
-        print("\-------- --------/\n")
-    except:
-        print("TODO: send error to server, pic is not conected")
+    print("AH PROCURA DO PIC NA PORTA SERIE")
+    pic_message = serial_port.read_until(b'\r')
+    pic_message = pic_message.decode(encoding='ascii')
+    pic_message = pic_message.strip()
+    print("MENSAGEM DO PIC:\n")
+    print(pic_message)
+    print("\-------- --------/\n")
     match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
     print(config_json['id'])
     print(match.group("exp_name"))
     if match.group("exp_name") == config_json['id']:
         #LOG_INFO
-        print("PIC FOUND ON THE SERIAL PORT")
+        print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
         if match.group("exp_state") == "STOPED":
             return True
         else:
@@ -72,7 +75,7 @@ def try_to_lock_experiment(serial_port):
                 return False
     else:
         #LOG INFO
-        print("PIC NOT FOUND ON THE SERIAL PORT")
+        print("NAO ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
         return False
 
 #DO_INIT - Abre a ligacao com a porta serie
@@ -85,7 +88,7 @@ def do_init(config_json):
 
     if 'serial_port' in config_json:
         for exp_port in config_json['serial_port']['ports_restrict']:
-            print("TRYING TO OPEN THE SERIAL PORT: "+exp_port+"\n")
+            print("A tentar abrir a porta"+exp_port+"\n")
             try:
                 #alterar esta função para aceitar mais definições do json
                 #é preciso uma função para mapear os valores para as constantes da porta série
@@ -95,22 +98,21 @@ def do_init(config_json):
                                                     timeout = int(config_json['serial_port']['death_timeout']))
             except serial.SerialException:
                 #LOG_WARNING: couldn't open serial port exp_port. Port doesnt exist or is in use
-                print("ERRO: Could not open serial port!!")
                 pass
             else:
-                if try_to_lock_experiment(serial_port) :
+                if try_to_lock_experiment(config_json, serial_port) :
                     break
                 else:
                     serial_port.close()
         
         if serial_port.is_open :
             #LOG_INFO : EXPERIMENT FOUND. INITIALIZING EXPERIMENT
-            print("I FOUND THE SERIAL PORT\n")
+            print("Consegui abrir a porta e encontrar a experiencia\n")
             #Mudar para números. Return 0 e mandar status
             return True
         else:
             #SUBSTITUIR POR LOG_ERROR : couldn't find the experiment in any of the configured serial ports
-            print("I COULDN'T OPEN THE DOOR AND FIND THE EXPERIENCE\n")
+            print("Nao consegui abrir a porta e encontrar a experiencia\n")
             #return -1
             return False
     else:
@@ -120,11 +122,21 @@ def do_init(config_json):
 
 def do_config(config_json) :
     global serial_port
-    try:
-        cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
-        cmd = cmd.encode(encoding="ascii")
-    except:
-        print("TODO: send error to server, pic is not conected")
+
+    # CONFIGURAÇÕES DA EXPERIENCIA JÁ CONVERTIDOS...
+    """
+    max_duty 
+    t_sinal
+    n_samp
+    n_period
+    setpoint_press
+    pump_press
+    """
+
+    cmd ="cfg\t"+str(config_json["config"]["max_duty"] * 6.429 + 14.286)+"\t"+str(config_json["config"]["t_sinal"] * 50 + 0.0),\
+    +"\t"+str(config_json["config"]["n_Samp"]) +"\t"+str(config_json["config"]["n_period"]),\
+    +"\t"+str(config_json["config"]["setpoint_press"] * 100 + 0.0) +"\t"+str(config_json["config"]["pump_press"] * 100 + 0.0) +"\r"
+    cmd = cmd.encode(encoding="ascii")
     #Deita fora as mensagens recebidas que não
     #interessam
     serial_port.reset_input_buffer()
