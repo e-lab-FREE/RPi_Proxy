@@ -4,6 +4,8 @@
 import serial
 import json
 import re
+from datetime import datetime
+
 
 serial_port = None
 #status, config
@@ -41,11 +43,22 @@ def receive_data_from_exp():
         adc_Value3: pressure gauge value
         """
         print("ENCONTREI INFO\nDADOS NA PORTA")
+        if pic_message == None:
+           print("Mensagem em branco !!!!!!!!")
+           pic_message = serial_port.read_until(b'\r')
+           pic_message = pic_message.decode(encoding='ascii')
+        print(pic_message+"\n\r")
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
-        pic_message = '{"adc_value1":"'+str(0.132088*pic_message[0] + 66.383)+\
-            '","adc_value2":"'+str(0.327324 * pic_message[1] + 36)+\
-            '","adc_value3":"'+str(pic_message[2])+'"}'
+        while True:
+            try:
+                pic_message = {"time":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),"adc_value1":str(0.132088*float(pic_message[0]) - 66.383),"adc_value2":str(0.327324 * float (pic_message[1]) - 36),"adc_value3":str(pic_message[2])}
+                break
+            except:
+                print("Mensagem em branco !!!!!!!!")
+                pic_message = serial_port.read_until(b'\r')
+                pic_message = pic_message.decode(encoding='ascii')
+        #pic_message = '{"adc_value1": "testing"}'
         return pic_message
         # pode ser que tem que adcionar mais parametros como: sample number, Date, time, millesecond, erros das variáveis (tensão, corrente e pressão)
 
@@ -132,10 +145,13 @@ def do_config(config_json) :
     setpoint_press
     pump_press
     """
+    print(config_json["config"]) #{'max_duty': 20, 'sigperiod': 25, 'numsamps': 20, 'numperiod': 20, 'pressure': 1.3, 'pump_press': 1.1, 'gas_selector': 1}
 
-    cmd ="cfg\t"+str(config_json["config"]["max_duty"] * 6.429 + 14.286)+"\t"+str(config_json["config"]["t_sinal"] * 50 + 0.0),\
-    +"\t"+str(config_json["config"]["n_Samp"]) +"\t"+str(config_json["config"]["n_period"]),\
-    +"\t"+str(config_json["config"]["setpoint_press"] * 100 + 0.0) +"\t"+str(config_json["config"]["pump_press"] * 100 + 0.0) +"\r"
+
+    cmd ="cfg\t"+str(int(float(config_json["config"]["max_duty"]) * 6.429 + 14.286))+"\t"+str(int(config_json["config"]["sigperiod"] * 50 + 0.0))\
+    +"\t"+str(config_json["config"]["numsamps"]) +"\t"+str(config_json["config"]["numperiod"])\
+    +"\t"+str(int(config_json["config"]["pressure"] * 1000 + 0.0)) +"\t"+str(int(config_json["config"]["pump_press"] * 1000 + 0.0))+"\t"+str(config_json["config"]["gas_selector"])+"\r"
+    print("Config msg send to pic:\n\r" + cmd + "\n\r")
     cmd = cmd.encode(encoding="ascii")
     #Deita fora as mensagens recebidas que não
     #interessam
