@@ -194,7 +194,7 @@ def do_stop() :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC A CONFIRMAR STPOK:\n")
         print(pic_message.decode(encoding='ascii'))
-        print("\-------- --------/\n")
+        print("\-------- ! --------/\n")
         if "STPOK" in pic_message.decode(encoding='ascii') :
             return True
         elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
