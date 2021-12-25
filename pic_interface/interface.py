@@ -60,6 +60,7 @@ def try_to_lock_experiment(serial_port):
     try:
         match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
     except:
+        match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
         print("ERROR: on search!")
     print(config_json['id'])
     print(match.group("exp_name"))
