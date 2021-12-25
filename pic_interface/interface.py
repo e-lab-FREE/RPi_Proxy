@@ -158,7 +158,7 @@ def do_config(config_json) :
 def do_start() :
     global serial_port
 
-    print("A tentar comecar a experiencia\n")
+    print("Try to start the experiment\n")
     
     cmd = "str\r"
     cmd = cmd.encode(encoding='ascii')
@@ -183,7 +183,7 @@ def do_start() :
 def do_stop() :
     global serial_port
     
-    print("A tentar parar experiencia\n")
+    print("Try to stop the experiment\n")
     cmd = "stp\r"
     cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
