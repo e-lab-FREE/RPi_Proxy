@@ -172,12 +172,9 @@ def do_start() :
         print("\-------- --------/\n")
         if "STROK" in pic_message.decode(encoding='ascii') :
             return True
-        # elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
-        #     return False
-        else:
-            serial_port.reset_input_buffer()
-            serial_port.write(cmd)
-            time.sleep(10)
+        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            return False
+        
         #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
         #    return False
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
@@ -186,7 +183,7 @@ def do_start() :
 
 def do_stop() :
     global serial_port
-
+    serial_port.flush()
     print("A tentar parar experiencia\n")
     cmd = "stp\r"
     cmd = cmd.encode(encoding='ascii')
@@ -199,8 +196,13 @@ def do_stop() :
         print("\-------- --------/\n")
         if "STPOK" in pic_message.decode(encoding='ascii') :
             return True
-        elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
-            return False
+        # elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
+        #     return False
+        else:
+            serial_port.flush()
+            serial_port.reset_input_buffer()
+            serial_port.write(cmd)
+            time.sleep(10)
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
         
@@ -208,7 +210,6 @@ def do_stop() :
 
 def do_reset() :
     global serial_port
-
     print("A tentar fazer reset da experiencia\n")
     cmd = "rst\r"
     cmd = cmd.encode(encoding='ascii')
