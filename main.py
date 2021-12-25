@@ -98,7 +98,7 @@ def GetConfig():
     # msg = {"secret":SEGREDO}
     response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
     CONFIG_OF_EXP = response.json()["experiment"]
-    if (test_end_point_print):
+    if (config_info['DEFAULT']['DEBUG']):
         print(json.dumps(CONFIG_OF_EXP,indent=4))
     return ''
 
@@ -110,7 +110,7 @@ def GetExecution():
 
 
     next_execution = response.json()
-    if (test_end_point_print):
+    if (config_info['DEFAULT']['DEBUG']):
         print("REQUEST\n")
         print(json.dumps(next_execution,indent=4))
     return ''
@@ -128,7 +128,7 @@ def SendPartialResult(msg):
     
     requests.post(api_url, headers = HEADERS, json=msg)
     # Result_id = response.json()
-    # if (test_end_point_print):
+    # if (config_info['DEFAULT']['DEBUG']):
     #     print(json.dumps(Result_id,indent=4))   
     return ''
 
@@ -144,11 +144,11 @@ def main_cycle():
     global status_config
     global Working
     if CONFIG_OF_EXP != None:
-        if test :
+        if (config_info['DEFAULT']['DEBUG']):
             print("Esta a passar pelo if none este\n")
         while True:
             if not Working:
-                if test :
+                if (config_info['DEFAULT']['DEBUG']):
                     print("Esta a passar pelo if none\n")
                 GetExecution()
                 if test:
