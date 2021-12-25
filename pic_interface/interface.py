@@ -191,13 +191,11 @@ def do_stop() :
     serial_port.flush()
     serial_port.write(cmd)
     while True :
-        pic_message = serial_port.read_until(b'\r')
-        print("MENSAGEM DO PIC A CONFIRMAR STPOK:\n")
-        print(pic_message.decode(encoding='ascii'))
-        print("\-------- ! --------/\n")
         try:
-            print(pic_message.decode(encoding='ascii').split("\t"))
-            print(pic_message.decode(encoding='ascii').split("\t")[2][0:-2] )
+            pic_message = serial_port.read_until(b'\r')
+            print("MENSAGEM DO PIC A CONFIRMAR STPOK:\n")
+            print(pic_message.decode(encoding='ascii'))
+            print("\-------- ! --------/\n")
             print ( pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED","RESETED\r"])
         except:
             pass
