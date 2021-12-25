@@ -164,7 +164,6 @@ def do_start() :
     cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
     serial_port.write(cmd)
-    time.sleep(10)
     while True :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC A CONFIRMAR STROK:\n")
