@@ -203,12 +203,10 @@ def do_stop() :
             pass
         if "STPOK" in pic_message.decode(encoding='ascii') :
             return True
-        elif  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"]  :
+        elif pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"]  :
             print("aqui mesmo aqui")
-            serial_port.flush()
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
-            time.sleep(10)
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
         
