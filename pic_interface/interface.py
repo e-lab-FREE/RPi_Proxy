@@ -62,7 +62,7 @@ def try_to_lock_experiment(serial_port):
         for character in pic_message:
             ascii_values.append(ord(character))
         print(ascii_values)
-        match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
+        match = re.search(r"^(IDS)(?P<exp_name>[^ \t]+)(?P<exp_state>[^ \t]+)$",pic_message)
     except:
         match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
         print("ERROR: on search!")
