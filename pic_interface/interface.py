@@ -195,7 +195,7 @@ def do_stop() :
         print("MENSAGEM DO PIC A CONFIRMAR STPOK:\n")
         print(pic_message.decode(encoding='ascii'))
         print("\-------- ! --------/\n")
-        print (re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')))
+        print (re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii'))!= None)
         if "STPOK" in pic_message.decode(encoding='ascii') :
             return True
         elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
