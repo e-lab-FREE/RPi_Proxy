@@ -200,6 +200,7 @@ def do_stop() :
         elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
         #    return False
         # else:
+            print("aqui mesmo aqui")
             serial_port.flush()
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
