@@ -203,12 +203,12 @@ def do_stop() :
         elif "STP" in pic_message.decode(encoding='ascii') :
             print("Reading the STP  send to the pic")
             pass
-        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
-            print("Sam trash on the serial port !?")
+        elif pic_message.decode(encoding='ascii').split("\t")[2] != None and  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"] :
+            print("There is garbage in the serial port try the command again!")
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
         else:
-            print("Read again")
+            print("ainda a continuar ")
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
         
