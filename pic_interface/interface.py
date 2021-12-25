@@ -197,6 +197,8 @@ def do_stop() :
         print(pic_message.decode(encoding='ascii'))
         print("\-------- ! --------/\n")
         try:
+            print(pic_message.decode(encoding='ascii').split("\t"))
+            print(pic_message.decode(encoding='ascii').split("\t")[2] )
             print ( ["CONFIGURED","RESETED"] in pic_message.decode(encoding='ascii').split("\t")[2] )
         except:
             pass
