@@ -106,10 +106,9 @@ def GetExecution():
     global next_execution
     api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
     response =  requests.get(api_url,headers = HEADERS)
-    print(response.json())
-
-
-    next_execution = response.json()
+    if (response.json()['protocol']['config'] !=None):
+        print(response.json())
+        next_execution = response.json()
     if config_info['DEFAULT']['DEBUG'] == "on":
         print("REQUEST\n")
         print(json.dumps(next_execution,indent=4))
