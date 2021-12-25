@@ -204,12 +204,12 @@ def do_stop() :
         # elif "STP" in pic_message.decode(encoding='ascii') :
         #     print("Reading the STP  send to the pic")
         #     pass
-        # elif len(pic_message.decode(encoding='ascii').split("\t")) == 3 and  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"] :
-        elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
-            
+        elif len(pic_message.decode(encoding='ascii').split("\t")) == 3 and  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"] :
+        # elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
             print("There is garbage in the serial port try the command again!")
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
+            # Maybe create a counter to give a time out if the pic is not working correct
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
         
