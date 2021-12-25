@@ -45,9 +45,7 @@ def receive_data_from_exp():
         return pic_message
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
-def try_to_lock_experiment(serial_port):
-    #LOG_INFO
-    ascii_values = []
+def try_to_lock_experiment(config_json, serial_port):
     print("SEARCHING FOR THE PIC IN THE SERIE PORT")
     try:
         pic_message = serial_port.read_until(b'\r')
@@ -61,11 +59,8 @@ def try_to_lock_experiment(serial_port):
     try:
         
         match = re.search(r"^(IDS)(?P<exp_name>[^ \t]+)(?P<exp_state>[^ \t]+)$",pic_message)
-        for character in pic_message:
-            ascii_values.append(ord(character))
-        print(ascii_values)
     except:
-        match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
+        match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
         print("ERROR: on search!")
     print(config_json['id'])
     print(match.group("exp_name"))
@@ -108,7 +103,7 @@ def do_init(config_json):
                 print("ERRO: Could not open serial port!!")
                 pass
             else:
-                if try_to_lock_experiment(serial_port) :
+                if try_to_lock_experiment(config_json, serial_port) :
                     break
                 else:
                     serial_port.close()
