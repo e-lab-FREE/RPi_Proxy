@@ -205,6 +205,8 @@ def do_stop() :
             print("aqui mesmo aqui")
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
+        else:
+            print("ainda a continuar ")
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
         
