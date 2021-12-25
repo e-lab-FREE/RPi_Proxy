@@ -5,7 +5,7 @@ import json
 import re
 import time
 
-serial_port = None
+serial_port = None 
 #status, config
 
 def print_serial():
