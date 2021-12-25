@@ -199,12 +199,12 @@ def do_stop() :
         try:
             print(pic_message.decode(encoding='ascii').split("\t"))
             print(pic_message.decode(encoding='ascii').split("\t")[2][0:-2] )
-            print ( pic_message.decode(encoding='ascii').split("\t")[2][0:-2] in ["CONFIGURED","RESETED"])
+            print ( pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED","RESETED\r"])
         except:
             pass
         if "STPOK" in pic_message.decode(encoding='ascii') :
             return True
-        elif  pic_message.decode(encoding='ascii').split("\t")[2][0:-2] in ["CONFIGURED","RESETED"]  :
+        elif  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"]  :
             print("aqui mesmo aqui")
             serial_port.flush()
             serial_port.reset_input_buffer()
