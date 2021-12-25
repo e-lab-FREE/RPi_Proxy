@@ -98,7 +98,7 @@ def GetConfig():
     # msg = {"secret":SEGREDO}
     response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
     CONFIG_OF_EXP = response.json()["experiment"]
-    if (config_info['DEFAULT']['DEBUG']):
+    if config_info['DEFAULT']['DEBUG'] == "on:
         print(json.dumps(CONFIG_OF_EXP,indent=4))
         print(type(config_info['DEFAULT']['DEBUG']))
     return ''
@@ -111,7 +111,7 @@ def GetExecution():
 
 
     next_execution = response.json()
-    if (config_info['DEFAULT']['DEBUG']):
+    if config_info['DEFAULT']['DEBUG'] == "on:
         print("REQUEST\n")
         print(json.dumps(next_execution,indent=4))
     return ''
@@ -122,14 +122,14 @@ def SendPartialResult(msg):
     # print(next_execution)
     
     api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
-    if (config_info['DEFAULT']['DEBUG']):
+    if config_info['DEFAULT']['DEBUG'] == "on:
         print(str(msg))
         print(api_url)
         print("Aqui:  " ,json.dumps(msg,indent=4))
     
     requests.post(api_url, headers = HEADERS, json=msg)
     # Result_id = response.json()
-    # if (config_info['DEFAULT']['DEBUG']):
+    # if config_info['DEFAULT']['DEBUG'] == "on:
     #     print(json.dumps(Result_id,indent=4))   
     return ''
 
@@ -145,11 +145,11 @@ def main_cycle():
     global status_config
     global Working
     if CONFIG_OF_EXP != None:
-        if (config_info['DEFAULT']['DEBUG']):
+        if config_info['DEFAULT']['DEBUG'] == "on:
             print("Esta a passar pelo if none este\n")
         while True:
             if not Working:
-                if (config_info['DEFAULT']['DEBUG']):
+                if config_info['DEFAULT']['DEBUG'] == "on:
                     print("Esta a passar pelo if none\n")
                 GetExecution()
                 if test:
