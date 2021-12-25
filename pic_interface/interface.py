@@ -203,8 +203,8 @@ def do_stop() :
         elif "STP" in pic_message.decode(encoding='ascii') :
             print("Reading the STP  send to the pic")
             pass
-        elif pic_message.decode(encoding='ascii').split("\t")[2] != None and  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"] :
-            print("aqui mesmo aqui")
+        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            print("Sam trash on the serial port !?")
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
         else:
