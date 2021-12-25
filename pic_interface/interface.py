@@ -159,6 +159,7 @@ def do_start() :
     global serial_port
 
     print("A tentar comecar a experiencia\n")
+    serial_port.flush()
     cmd = "str\r"
     cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
