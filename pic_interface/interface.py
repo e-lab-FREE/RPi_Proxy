@@ -183,11 +183,12 @@ def do_start() :
 
 def do_stop() :
     global serial_port
-    serial_port.flush()
+    
     print("A tentar parar experiencia\n")
     cmd = "stp\r"
     cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
+    serial_port.flush()
     serial_port.write(cmd)
     while True :
         pic_message = serial_port.read_until(b'\r')
