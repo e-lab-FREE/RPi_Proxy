@@ -159,7 +159,7 @@ def do_start() :
     global serial_port
 
     print("A tentar comecar a experiencia\n")
-    serial_port.flush()
+    
     cmd = "str\r"
     cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
@@ -172,8 +172,8 @@ def do_start() :
         print("\-------- --------/\n")
         if "STROK" in pic_message.decode(encoding='ascii') :
             return True
-        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
-            return False
+        # elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+        #     return False
         else:
             serial_port.reset_input_buffer()
             serial_port.write(cmd)
