@@ -199,7 +199,7 @@ def do_stop() :
         try:
             print(pic_message.decode(encoding='ascii').split("\t"))
             print(pic_message.decode(encoding='ascii').split("\t")[2] )
-            print ( ["CONFIGURED","RESETED"] in pic_message.decode(encoding='ascii').split("\t")[2] )
+            print ( ["CONFIGURED","RESETED"] in pic_message.decode(encoding='ascii').split("\t")[2][0:-2] )
         except:
             pass
         if "STPOK" in pic_message.decode(encoding='ascii') :
