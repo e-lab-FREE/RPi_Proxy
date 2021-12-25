@@ -58,7 +58,10 @@ def try_to_lock_experiment(serial_port):
     except:
         print("TODO: send error to server, pic is not conected")
     print ("Is OK!!")
-    match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
+    try:
+        match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
+    except:
+        print("ERROR: on search!")
     print(config_json['id'])
     print(match.group("exp_name"))
     if match.group("exp_name") == config_json['id']:
