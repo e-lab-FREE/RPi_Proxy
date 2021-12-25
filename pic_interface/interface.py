@@ -70,6 +70,7 @@ def try_to_lock_experiment(serial_port):
         if match.group("exp_state") == "STOPED":
             return True
         else:
+            print("STATE OF MACHINE DIF OF STOPED")
             if do_stop():
                 return True
             else:
