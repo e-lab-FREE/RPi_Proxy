@@ -47,6 +47,7 @@ def receive_data_from_exp():
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(serial_port):
     #LOG_INFO
+    ascii_values = []
     print("SEARCHING FOR THE PIC IN THE SERIE PORT")
     try:
         pic_message = serial_port.read_until(b'\r')
@@ -58,6 +59,9 @@ def try_to_lock_experiment(serial_port):
     except:
         print("TODO: send error to server, pic is not conected")
     try:
+        for character in pic_message:
+            ascii_values.append(ord(character))
+        print(ascii_values)
         match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
     except:
         match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s\s(?P<exp_state>[^ \t]+)$",pic_message)
