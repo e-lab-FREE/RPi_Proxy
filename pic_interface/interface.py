@@ -173,6 +173,10 @@ def do_start() :
             return True
         elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
             return False
+        else:
+            serial_port.reset_input_buffer()
+            serial_port.write(cmd)
+            time.sleep(10)
         #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
         #    return False
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
