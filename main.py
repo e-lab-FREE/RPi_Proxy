@@ -60,6 +60,7 @@ def send_exp_data():
             SendPartialResult(send_message)
             Working = False
             next_execution = {}
+            SAVE_DATA=[]
             time.sleep(0.00001)
             return 
 

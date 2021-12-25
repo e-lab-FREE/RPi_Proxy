@@ -57,6 +57,7 @@ def try_to_lock_experiment(serial_port):
         print("\-------- --------/\n")
     except:
         print("TODO: send error to server, pic is not conected")
+    print ("Is OK!!")
     match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
     print(config_json['id'])
     print(match.group("exp_name"))
@@ -103,7 +104,7 @@ def do_init(config_json):
                 else:
                     serial_port.close()
         
-        if serial_port.is_open :
+        if serial_port.is_open:
             #LOG_INFO : EXPERIMENT FOUND. INITIALIZING EXPERIMENT
             print("I FOUND THE SERIAL PORT\n")
             #Mudar para números. Return 0 e mandar status
