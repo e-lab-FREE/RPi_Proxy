@@ -12,8 +12,8 @@ import re
 
 lock = threading.Lock()
 
-config = configparser.ConfigParser()
-config.read('server_info.ini')
+config_info = configparser.ConfigParser()
+config_info.read('server_info.ini')
 
 FORMAT = 'utf-8'
 
@@ -30,7 +30,7 @@ Waiting_for_config = True
 interface = None
 
 HEADERS = { 
-  "Authentication": str(config['DEFAULT']['SECRET']), 
+  "Authentication": str(config_info['DEFAULT']['SECRET']), 
   "Content-Type": "application/json"
 }
 
@@ -94,7 +94,7 @@ def Send_Config_to_Pic(myjson):
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
     CONFIG_OF_EXP = response.json()["experiment"]
@@ -104,7 +104,7 @@ def GetConfig():
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']+"/nextexecution"
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
     response =  requests.get(api_url,headers = HEADERS)
     print(response.json())
 
@@ -119,12 +119,13 @@ def GetExecution():
 def SendPartialResult(msg):
     global next_execution
     # print(next_execution)
-    print(str(msg))
-
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/result"
-    print(api_url)
-    # todo = {"value":{"ok":"ola","ponto":"oco"},"time":datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),"result_type":"p"}
-    print("Aqui:  " ,json.dumps(msg,indent=4))
+    
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
+    if (config_info['DEFAULT']['DEBUG']):
+        print(str(msg))
+        print(api_url)
+        print("Aqui:  " ,json.dumps(msg,indent=4))
+    
     requests.post(api_url, headers = HEADERS, json=msg)
     # Result_id = response.json()
     # if (test_end_point_print):
