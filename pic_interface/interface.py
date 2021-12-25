@@ -57,7 +57,6 @@ def try_to_lock_experiment(serial_port):
         print("\-------- --------/\n")
     except:
         print("TODO: send error to server, pic is not conected")
-    print ("Is OK!!")
     try:
         match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
     except:
