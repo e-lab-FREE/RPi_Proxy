@@ -182,7 +182,7 @@ def do_stop() :
 
     print("A tentar parar experiencia\n")
     cmd = "stp\r"
-    # cmd = cmd.encode(encoding='ascii')
+    cmd = cmd.encode(encoding='ascii')
     serial_port.reset_input_buffer()
     serial_port.write(cmd)
     while True :
