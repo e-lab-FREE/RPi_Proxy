@@ -191,7 +191,6 @@ def do_stop() :
     serial_port.flush()
     serial_port.write(cmd)
     while True :
-        serial_port.flush()
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC A CONFIRMAR STPOK:\n")
         print(pic_message.decode(encoding='ascii'))
