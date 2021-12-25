@@ -100,7 +100,7 @@ def GetConfig():
     CONFIG_OF_EXP = response.json()["experiment"]
     if (config_info['DEFAULT']['DEBUG']):
         print(json.dumps(CONFIG_OF_EXP,indent=4))
-        print(config_info['DEFAULT']['DEBUG'])
+        print(type(config_info['DEFAULT']['DEBUG']))
     return ''
 
 def GetExecution():
