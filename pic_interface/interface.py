@@ -172,6 +172,7 @@ def do_start() :
         if "STROK" in pic_message.decode(encoding='ascii') :
             return True
         elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            print("OOOO")
             return False
         
         #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
