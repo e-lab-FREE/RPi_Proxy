@@ -1,5 +1,41 @@
-# RPi_Proxy
+# RPi Proxy
 This is a simple proxy that communicate with the main server. 
+
+## Requirements
+
+Install the following:
+```
+sudo  apt-get install git
+```
+
+For the video stream:
+```
+sudo apt-get install gstreamer1.0-tools
+```
+```
+sudo apt-get install gstreamer1.0-plugins-good
+```
+```
+sudo apt-get install gstreamer1.0-plugins-bad
+```
+```
+sudo apt-get install gstreamer1.0-plugins-ugly
+```
+```
+sudo apt-get install gstreamer1.0-plugins-base
+```
+For the Proxy it self:
+```
+sudo apt install python3
+```
+```
+sudo apt install python3-pip
+```
+```
+pip3 install pyserial
+```
+
+## How to connect to [FREE_Web](https://github.com/e-lab-FREE/FREE_Web)
 To be able to comunicate with your main server, you need to change the configuration of the proxy you need to edit the following file:
 
 * `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, EXPERIMENT_ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
@@ -11,9 +47,10 @@ PORT = 5000
 APPARATUS_ID = 1
 EXPERIMENT_ID = 1
 SECRET = test_1
+DEBUG = on
 ```
 
-*  `strat-video.sh` - change the video_server and video_port with the info of your video server (with janus installed). Also cahnge the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camare.
+*  `strat-video.sh` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camara.
 
 
 ```sh
@@ -28,6 +65,15 @@ video_frame=30/1
 killall gst-launch-1.0
 gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame ! clockoverlay time-format="%x - %X" ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink host=$video_server port=$video_port async=false 
 ```
+Some usefull comands:
+```
+v4l2-ctl --list-devices
+```
+```
+v4l2-ctl -d /dev/video2 --list-formats-ext
+```
+
+
 ## About
 
 
