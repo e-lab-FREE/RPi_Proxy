@@ -75,7 +75,6 @@ def Send_Config_to_Pic(myjson):
         data_thread = threading.Thread(target=send_exp_data,daemon=True)
         print("PIC configurado.\n")
         if interface.do_start():                            #tentar começar experiencia
-            print("aqui")
             Working = True
             data_thread.start()
             time.sleep(0.000001)
