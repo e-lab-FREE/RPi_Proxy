@@ -45,7 +45,8 @@ def send_exp_data():
     # SendPartialResult(send_message)
     while True:
         exp_data = interface.receive_data_from_exp()
-        print(exp_data)
+        if config_info['DEFAULT']['DEBUG'] == "on":
+            print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
         try:
             exp_data = json.loads(exp_data)
         except:
