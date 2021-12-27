@@ -22,8 +22,8 @@ def print_serial():
 
 def receive_data_from_exp():
     global serial_port
-
-    print("SEARCHING FOR INFO IN THE SERIE PORT\n")
+    if (dbuging == "on"):
+        print("SEARCHING FOR INFO IN THE SERIE PORT\n")
     try:
         pic_message = serial_port.read_until(b'\r')
         pic_message = pic_message.decode(encoding='ascii')
