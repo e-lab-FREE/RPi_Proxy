@@ -176,7 +176,7 @@ if __name__ == "__main__":
     while True:
         try:
             GetConfig()
-            if interface.do_init(CONFIG_OF_EXP["config"]) :
+            if interface.do_init(CONFIG_OF_EXP["config"],config_info['DEFAULT']['DEBUG']) :
                 # print("Aqui")
                 main_cycle()
             else:

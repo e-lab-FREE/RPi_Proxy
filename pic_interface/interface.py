@@ -5,7 +5,10 @@ import json
 import re
 import time
 
+import pic_interface.experiment_details as exp
+
 serial_port = None 
+dbuging = "off"
 #status, config
 
 def print_serial():
@@ -26,9 +29,10 @@ def receive_data_from_exp():
         pic_message = pic_message.decode(encoding='ascii')
     except:
         print("TODO: send error to server, pic is not conected")
-    print("MENSAGE FORM PIC:\n")
-    print(pic_message)
-    print("\-------- --------/\n")
+    if (dbuging == "on"):
+        print("MENSAGE FORM PIC:\n")
+        print(pic_message)
+        print("\-------- --------/\n")
     if "DAT" in pic_message:
         print("INFO FOUND\nEXPERIMENTE STARTED")
         return "DATA_START"
@@ -37,13 +41,11 @@ def receive_data_from_exp():
         return "DATA_END"
     else:
         #1       3.1911812       9.7769165       21.2292843      25.72
-        print("INFO FOUND\nDATA SEND TO THE SERVER")
+        if (dbuging == "on"):
+            print("INFO FOUND\nDATA SEND TO THE SERVER")
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
-        pic_message = '{"Sample_number":"'+str(pic_message[0])+\
-            '","Val1":"'+str(pic_message[1])+'","Val2":"'+str(pic_message[2])+\
-            '","Val3":"'+str(pic_message[3])+'","Val4":"'+str(pic_message[4])+'"}'
-        return pic_message
+        return exp.data_to_json(pic_message)
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(config_json, serial_port):
@@ -82,9 +84,10 @@ def try_to_lock_experiment(config_json, serial_port):
 #melhores, por exemplo, as portas não existem ou não está o pic em nenhuma
 #delas outra hipotese é retornar ao cliente exito ou falha
 #e escrever detalhes no log do sistema
-def do_init(config_json):
+def do_init(config_json,dbug):
     global serial_port
-
+    global dbuging
+    dbuging = dbug
     if 'serial_port' in config_json:
         for exp_port in config_json['serial_port']['ports_restrict']:
             print("TRYING TO OPEN THE SERIAL PORT: "+exp_port+"\n")
@@ -122,15 +125,16 @@ def do_init(config_json):
 
 def do_config(config_json) :
     global serial_port
-    try:
-        cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
-        cmd = cmd.encode(encoding="ascii")
-    except:
-        print("TODO: send error to server, pic is not conected")
+    cmd = exp.msg_to_config_experiment(config_json)
+    if cmd is not False:
+        serial_port.reset_input_buffer()
+        serial_port.write(cmd)
+    else:
+        print("ERROR: on the config of the experiment")
+        return -1, False 
     #Deita fora as mensagens recebidas que não
     #interessam
-    serial_port.reset_input_buffer()
-    serial_port.write(cmd)
+    
     print("A tentar configurar experiência")
     while True :
         pic_message = serial_port.read_until(b'\r')
@@ -172,7 +176,7 @@ def do_start() :
         if "STROK" in pic_message.decode(encoding='ascii') :
             return True
         elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
-            print("OOOO")
+            # print("OOOO")
             return False
         
         #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
