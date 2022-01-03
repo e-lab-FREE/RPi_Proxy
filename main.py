@@ -49,7 +49,6 @@ def send_exp_data():
         
         print(time_send)
         print (time_send - save_time )
-        pass
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
     # SendPartialResult(send_message)
     while True:
