@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 def msg_to_config_experiment(config_json):
     try:
         cmd ="cfg\t"+str(int(float(config_json["config"]["max_duty"]) * 6.429 + 14.286))+\

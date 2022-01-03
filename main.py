@@ -21,6 +21,7 @@ CONFIG_OF_EXP = []
 next_execution = {}
 status_config= {}
 SAVE_DATA = []
+SEND_NT = []
 
 test =False
 test_end_point_print = True
@@ -34,12 +35,15 @@ HEADERS = {
   "Content-Type": "application/json"
 }
 
+time_to_send = 200000
 def send_exp_data():
     global SAVE_DATA
     global Working
     global next_execution
     global lock
     while interface.receive_data_from_exp() != "DATA_START":
+        time_send = int(datetime.now().strftime('%f')[:-4])
+        save_time =time_send 
         pass
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
     # SendPartialResult(send_message)
@@ -52,11 +56,19 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-            
+            time_send = int(datetime.now().strftime('%f')[:-4])
             SAVE_DATA.append(exp_data)
-            send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
-            SendPartialResult(send_message)
+            SEND_NT.append(exp_data)
+            if (time_send - save_time) >= time_to_send :
+                save_time = time_send
+                send_message = {"execution":int(next_execution["id"]),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
+                SEND_NT = []
+                SendPartialResult(send_message)
         else:
+            if SEND_NT != []:
+                send_message = {"execution":int(next_execution["id"]),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
+                SEND_NT = []
+                SendPartialResult(send_message)
             send_message = {"execution":int(next_execution["id"]),"value":SAVE_DATA,"result_type":"f"}
             SendPartialResult(send_message)
             Working = False
