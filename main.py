@@ -31,7 +31,7 @@ Waiting_for_config = True
 
 interface = None
 
-time_to_send = 200000
+time_to_send = 200
 
 HEADERS = { 
   "Authentication": str(config_info['DEFAULT']['SECRET']), 
@@ -47,9 +47,9 @@ def send_exp_data():
     global SEND_NT
     while True:
         if interface.receive_data_from_exp() == "DATA_START":
-            save_time = int(datetime.now().strftime("%f")[:-3])
+            save_time = int(datetime.now().strftime("%H:%M:%S.%f")[:-3])
             time.sleep(0.00010)
-            time_send = int(datetime.now().strftime("%f")[:-3])
+            time_send = int(datetime.now().strftime("%H:%M:%S.%f")[:-3])
             print(save_time)
             print(save_time-time_send)
             break
@@ -65,7 +65,7 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-            time_send = int(datetime.now().strftime('%f')[:-4])
+            time_send = int(datetime.now().strftime('%H:%M:%S.%f')[:-4])
             print(time_send)
             SAVE_DATA.append(exp_data)
             SEND_NT.append(exp_data)
