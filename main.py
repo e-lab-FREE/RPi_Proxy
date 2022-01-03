@@ -47,11 +47,11 @@ def send_exp_data():
     global SEND_NT
     while True:
         if interface.receive_data_from_exp() == "DATA_START":
-            save_time = parse(datetime.now().strftime("%f")[:-3])
+            save_time = datetime.now().strftime("%f")[:-3]
             time.sleep(0.00010)
-            time_send = parse(datetime.now().strftime("%f")[:-3])
+            time_send = datetime.now().strftime("%f")[:-3]
             print(save_time)
-            print(int((time_send-save_time).strftime("%f")[:-3]))
+            print(int(parse(time_send-save_time).strftime("%f")[:-3]))
             break
         
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
