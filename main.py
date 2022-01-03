@@ -36,7 +36,7 @@ HEADERS = {
   "Content-Type": "application/json"
 }
 
-time_to_send = 200000
+
 def send_exp_data():
     global SAVE_DATA
     global Working
@@ -45,9 +45,9 @@ def send_exp_data():
     global SEND_NT
     while True:
         if interface.receive_data_from_exp() == "DATA_START":
-            save_time = int(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3])
+            save_time = parse(datetime.now().strftime("%f")[:-3])
             time.sleep(0.00010)
-            time_send = int(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3])
+            time_send = parse(datetime.now().strftime("%f")[:-3])
             print(save_time)
             print(int(time_send-save_time))
             break
