@@ -8,6 +8,7 @@ import configparser
 import serial
 import json
 import re
+from dateutil.parser import parse
 
 
 lock = threading.Lock()
@@ -43,8 +44,11 @@ def send_exp_data():
     global lock
     global SEND_NT
     while interface.receive_data_from_exp() != "DATA_START":
-        time_send = int(datetime.now().strftime('%f')[:-4])
-        save_time = time_send 
+        time_send = parse(datetime.now().strftime('%f')[:-4])
+        save_time = parse(datetime.now().strftime('%f')[:-4])
+        
+        print(time_send)
+        print (time_send - save_time )
         pass
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
     # SendPartialResult(send_message)
