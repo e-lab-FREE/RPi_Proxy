@@ -49,7 +49,7 @@ def send_exp_data():
             time.sleep(0.00010)
             time_send = parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3])
             print(save_time)
-            print(save_time - time_send)
+            print(time_send-save_time)
             break
         
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
