@@ -31,6 +31,8 @@ Waiting_for_config = True
 
 interface = None
 
+time_to_send = 200000
+
 HEADERS = { 
   "Authentication": str(config_info['DEFAULT']['SECRET']), 
   "Content-Type": "application/json"
@@ -49,7 +51,7 @@ def send_exp_data():
             time.sleep(0.00010)
             time_send = parse(datetime.now().strftime("%f")[:-3])
             print(save_time)
-            print(int(time_send-save_time))
+            print(int((time_send-save_time).strftime("%f")[:-3]))
             break
         
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
