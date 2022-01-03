@@ -67,7 +67,7 @@ def send_exp_data():
             print(time_send)
             SAVE_DATA.append(exp_data)
             SEND_NT.append(exp_data)
-            if (time_send - save_time) >= time_to_send :
+            if int(time_send - save_time) >= time_to_send :
                 save_time = time_send
                 send_message = {"execution":int(next_execution["id"]),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
                 SEND_NT = []
