@@ -31,7 +31,7 @@ Waiting_for_config = True
 
 interface = None
 
-time_to_send = 200
+partial_total = 20
 
 HEADERS = { 
   "Authentication": str(config_info['DEFAULT']['SECRET']), 
@@ -47,11 +47,7 @@ def send_exp_data():
     global SEND_NT
     while True:
         if interface.receive_data_from_exp() == "DATA_START":
-            save_time = int(datetime.now().strftime("%f")[:-3])
-            time.sleep(0.00010)
-            time_send = int(datetime.now().strftime("%f")[:-3])
-            print(save_time)
-            print(save_time-time_send)
+            inte_send=0
             break
         
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
@@ -65,15 +61,14 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-            time_send = int(datetime.now().strftime('%f')[:-3])
-            print(time_send)
             SAVE_DATA.append(exp_data)
             SEND_NT.append(exp_data)
-            if int(time_send - save_time) >= time_to_send :
-                save_time = time_send
+            inte_send = inte_send +1
+            if inte_send >= partial_total :
+                inte_send = 0
                 send_message = {"execution":int(next_execution["id"]),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
                 SEND_NT = []
-                SendPartialResult(send_message)
+                SendPartialResult(send_message)    
         else:
             if SEND_NT != []:
                 send_message = {"execution":int(next_execution["id"]),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
