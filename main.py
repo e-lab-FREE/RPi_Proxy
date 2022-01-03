@@ -44,7 +44,7 @@ def send_exp_data():
     global SEND_NT
     while interface.receive_data_from_exp() != "DATA_START":
         time_send = int(datetime.now().strftime('%f')[:-4])
-        save_time =time_send 
+        save_time = time_send 
         pass
     # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
     # SendPartialResult(send_message)
