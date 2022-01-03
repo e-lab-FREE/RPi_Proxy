@@ -57,6 +57,7 @@ def send_exp_data():
             pass
         if exp_data != "DATA_END":
             time_send = int(datetime.now().strftime('%f')[:-4])
+            print(time_send)
             SAVE_DATA.append(exp_data)
             SEND_NT.append(exp_data)
             if (time_send - save_time) >= time_to_send :
