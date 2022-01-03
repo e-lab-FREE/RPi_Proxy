@@ -40,12 +40,31 @@ def receive_data_from_exp():
         print("INFO FOUND\nEXPERIMENTE ENDED")
         return "DATA_END"
     else:
-        #1       3.1911812       9.7769165       21.2292843      25.72
-        if (dbuging == "on"):
-            print("INFO FOUND\nDATA SEND TO THE SERVER")
+        """ AQUI SÃO OS OUTPUTS DA EXPERIÊNÇIA JÁ CONVERTIDOS
+               adc_value1       adc_value2       adc_Value3
+        Linear function in the form f(x) = slope*x + offset
+        adc_Value1: tension ( f(V) =  0.132088*adc_value1 + 66.383)  
+        adc_Value2: current ( f(A) =  0.327324*adc_value2 + 36)  
+        adc_Value3: pressure gauge value
+        """
+        print("ENCONTREI INFO\nDADOS NA PORTA")
+        if pic_message == None:
+           print("Mensagem em branco !!!!!!!!")
+           pic_message = serial_port.read_until(b'\r')
+           pic_message = pic_message.decode(encoding='ascii')
+        print(pic_message+"\n\r")
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
-        return exp.data_to_json(pic_message)
+        while True:
+            try:
+                pic_message = exp.data_to_json(pic_message)
+                break
+            except:
+                print("Mensagem em branco !!!!!!!!")
+                pic_message = serial_port.read_until(b'\r')
+                pic_message = pic_message.decode(encoding='ascii')
+        #pic_message = '{"adc_value1": "testing"}'
+        return pic_message
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(config_json, serial_port):
