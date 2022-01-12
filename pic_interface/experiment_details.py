@@ -17,6 +17,8 @@ def msg_to_config_experiment(config_json):
         return False 
 
 def data_to_json(pic_message):
+    print(pic_message[0])
+    print(pic_message[1])
     return {"time":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),\
             "adc_value1":str(float(0.132088*int(pic_message[0])) - 66.383),\
             "adc_value2":str(float(0.327324 * int (pic_message[1])) - 36),\
