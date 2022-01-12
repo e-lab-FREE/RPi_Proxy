@@ -10,7 +10,7 @@ import pic_interface.experiment_details as exp
 
 serial_port = None 
 dbuging = "off"
-time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+time_point = now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 dt=1
 
 #status, config
