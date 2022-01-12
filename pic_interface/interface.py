@@ -4,8 +4,7 @@ import serial
 import json
 import re
 import time
-from datetime import datetime
-from datetime import timedelta
+import datetime as datetime
 
 import pic_interface.experiment_details as exp
 
