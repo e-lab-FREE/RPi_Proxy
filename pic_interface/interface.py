@@ -63,8 +63,8 @@ def receive_data_from_exp():
                 print("Mensagem em branco !!!!!!!!")
                 pic_message = serial_port.read_until(b'\r')
                 pic_message = pic_message.decode(encoding='ascii')
-                pic_message = pic_message.strip()
-                pic_message = pic_message.split("\t")
+                pic_message = pic_message.strip()  ## 
+                pic_message = pic_message.split("\t") ## correcção do bug 
                 # print(pic_message)
         #pic_message = '{"adc_value1": "testing"}'
         return pic_message
