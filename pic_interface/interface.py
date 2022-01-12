@@ -52,7 +52,7 @@ def receive_data_from_exp():
            print("Mensagem em branco !!!!!!!!")
            pic_message = serial_port.read_until(b'\r')
            pic_message = pic_message.decode(encoding='ascii')
-        print(pic_message+"\n\r")
+        
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
         while True:
@@ -63,6 +63,7 @@ def receive_data_from_exp():
                 print("Mensagem em branco !!!!!!!!")
                 pic_message = serial_port.read_until(b'\r')
                 pic_message = pic_message.decode(encoding='ascii')
+                print(pic_message+"\n\r")
         #pic_message = '{"adc_value1": "testing"}'
         return pic_message
     
