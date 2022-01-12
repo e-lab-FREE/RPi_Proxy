@@ -4,13 +4,14 @@ import serial
 import json
 import re
 import time
-import datetime 
+from datetime import datetime
+
 
 import pic_interface.experiment_details as exp
 
 serial_port = None 
 dbuging = "off"
-time_point = now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 dt=1
 
 #status, config
@@ -64,7 +65,7 @@ def receive_data_from_exp():
         pic_message = pic_message.split("\t")
         while True:
             try:
-                time_point = time_point + datetime.timedelta(milliseconds=dt)
+                time_point = time_point + datetime.timedelta(0, 0, 0, dt*1000)
                 pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
