@@ -65,7 +65,7 @@ def receive_data_from_exp():
                 pic_message = pic_message.decode(encoding='ascii')
                 pic_message = pic_message.strip()
                 pic_message = pic_message.split("\t")
-                print(pic_message+"\n\r")
+                # print(pic_message)
         #pic_message = '{"adc_value1": "testing"}'
         return pic_message
     
