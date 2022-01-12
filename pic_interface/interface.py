@@ -65,7 +65,7 @@ def receive_data_from_exp():
         pic_message = pic_message.split("\t")
         while True:
             try:
-                time_point = time_point + datetime.timedelta(0, 0, 0, dt*1000)
+                time_point = time_point + timedelta(0, 0, 0, dt*1000)
                 pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
