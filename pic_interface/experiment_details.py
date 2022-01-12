@@ -6,8 +6,8 @@ def msg_to_config_experiment(config_json):
             "\t"+str(int(config_json["config"]["sigperiod"] * 50 + 0.0))+\
             "\t"+str(config_json["config"]["numsamps"]) +\
             "\t"+str(config_json["config"]["numperiod"])+\
-            "\t"+str(int(config_json["config"]["pressure"] * 1000 + 0.0)) +\
-            "\t"+str(int(config_json["config"]["pump_press"] * 1000 + 0.0))+\
+            "\t"+str(int(config_json["config"]["pressure"] * 100 + 0.0)) +\
+            "\t"+str(int(config_json["config"]["pump_press"] * 100 + 0.0))+\
             "\t"+str(config_json["config"]["gas_selector"])+\
             "\r"
         cmd = cmd.encode(encoding="ascii")
