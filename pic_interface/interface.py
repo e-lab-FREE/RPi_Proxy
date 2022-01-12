@@ -4,11 +4,15 @@ import serial
 import json
 import re
 import time
+from datetime import datetime
 
 import pic_interface.experiment_details as exp
 
 serial_port = None 
 dbuging = "off"
+time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+dt=1
+
 #status, config
 
 def print_serial():
@@ -22,6 +26,8 @@ def print_serial():
 
 def receive_data_from_exp():
     global serial_port
+    global dt
+    global time_point
     if (dbuging == "on"):
         print("SEARCHING FOR INFO IN THE SERIE PORT\n")
     try:
@@ -35,6 +41,7 @@ def receive_data_from_exp():
         print("\-------- --------/\n")
     if "DAT" in pic_message:
         print("INFO FOUND\nEXPERIMENTE STARTED")
+        time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         return "DATA_START"
     elif "END" in pic_message:
         print("INFO FOUND\nEXPERIMENTE ENDED")
@@ -57,7 +64,8 @@ def receive_data_from_exp():
         pic_message = pic_message.split("\t")
         while True:
             try:
-                pic_message = exp.data_to_json(pic_message)
+                time_point = time_point + datetime.timedelta(milliseconds=dt)
+                pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
                 print("Mensagem em branco !!!!!!!!")
@@ -147,6 +155,8 @@ def do_init(config_json,dbug):
 
 def do_config(config_json) :
     global serial_port
+    global dt 
+    dt = int(int(config_json["config"]["numsamps"])/int(config_json["config"]["numperiod"]))
     cmd = exp.msg_to_config_experiment(config_json)
     if cmd is not False:
         serial_port.reset_input_buffer()
