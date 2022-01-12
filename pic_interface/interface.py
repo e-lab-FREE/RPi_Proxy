@@ -4,7 +4,7 @@ import serial
 import json
 import re
 import time
-from datetime import datetime
+from datetime import datetime, date, time, timedelta
 
 
 import pic_interface.experiment_details as exp
@@ -69,7 +69,7 @@ def receive_data_from_exp():
                 pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
-                print("Mensagem em branco !!!!!!!!")
+                print("Mensagem em branco __ !!!!!!!!")
                 pic_message = serial_port.read_until(b'\r')
                 pic_message = pic_message.decode(encoding='ascii')
                 pic_message = pic_message.strip()  ## 
