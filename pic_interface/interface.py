@@ -11,7 +11,7 @@ import pic_interface.experiment_details as exp
 
 serial_port = None 
 dbuging = "off"
-time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+time_point = datetime.now()
 dt=1
 
 #status, config
@@ -42,7 +42,7 @@ def receive_data_from_exp():
         print("\-------- --------/\n")
     if "DAT" in pic_message:
         print("INFO FOUND\nEXPERIMENTE STARTED")
-        time_point = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        time_point = datetime.now()
         return "DATA_START"
     elif "END" in pic_message:
         print("INFO FOUND\nEXPERIMENTE ENDED")
@@ -65,7 +65,7 @@ def receive_data_from_exp():
         pic_message = pic_message.split("\t")
         while True:
             try:
-                # time_point = time_point + timedelta(0, 0, 0, dt*1000)
+                time_point = time_point +  timedelta(milliseconds=dt)
                 pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
