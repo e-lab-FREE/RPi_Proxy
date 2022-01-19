@@ -157,7 +157,7 @@ def do_init(config_json,dbug):
 def do_config(config_json) :
     global serial_port
     global dt 
-    dt = int(int(config_json["config"]["numsamps"])/int(config_json["config"]["numperiod"]))
+    dt = int(int(config_json["config"]["sigperiod"])/int(config_json["config"]["numsamps"]))
     cmd = exp.msg_to_config_experiment(config_json)
     if cmd is not False:
         serial_port.reset_input_buffer()
