@@ -12,8 +12,10 @@ import re
 
 lock = threading.Lock()
 
-config = configparser.ConfigParser()
-config.read('server_info.ini')
+
+config_info = configparser.ConfigParser()
+config_info.read('server_info.ini')
+
 
 FORMAT = 'utf-8'
 
@@ -30,7 +32,9 @@ Waiting_for_config = True
 interface = None
 
 HEADERS = { 
-  "Authentication": str(config['DEFAULT']['SECRET']), 
+
+  "Authentication": str(config_info['DEFAULT']['SECRET']), 
+
   "Content-Type": "application/json"
 }
 
@@ -45,7 +49,9 @@ def send_exp_data():
     # SendPartialResult(send_message)
     while True:
         exp_data = interface.receive_data_from_exp()
-        print(exp_data)
+
+        if config_info['DEFAULT']['DEBUG'] == "on":
+            print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
         try:
             exp_data = json.loads(exp_data)
         except:
@@ -60,6 +66,7 @@ def send_exp_data():
             SendPartialResult(send_message)
             Working = False
             next_execution = {}
+            SAVE_DATA=[]
             time.sleep(0.00001)
             return 
 
@@ -90,26 +97,28 @@ def Send_Config_to_Pic(myjson):
 
 
 
+
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
     CONFIG_OF_EXP = response.json()["experiment"]
-    if (test_end_point_print):
+    if config_info['DEFAULT']['DEBUG'] == "on":
         print(json.dumps(CONFIG_OF_EXP,indent=4))
     return ''
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/apparatus/"+config['DEFAULT']['APPARATUS_ID']+"/nextexecution"
+
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
     response =  requests.get(api_url,headers = HEADERS)
-    print(response.json())
+    if (response.json()['protocol']['config'] !=None):
+        print(response.json())
+        next_execution = response.json()
+    if config_info['DEFAULT']['DEBUG'] == "on":
 
-
-    next_execution = response.json()
-    if (test_end_point_print):
         print("REQUEST\n")
         print(json.dumps(next_execution,indent=4))
     return ''
@@ -118,15 +127,16 @@ def GetExecution():
 def SendPartialResult(msg):
     global next_execution
     # print(next_execution)
-    print(str(msg))
 
-    api_url = "http://"+config['DEFAULT']['SERVER']+":"+config['DEFAULT']['PORT']+"/api/v1/result"
-    print(api_url)
-    # todo = {"value":{"ok":"ola","ponto":"oco"},"time":datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),"result_type":"p"}
-    print("Aqui:  " ,json.dumps(msg,indent=4))
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
+    if config_info['DEFAULT']['DEBUG'] == "on":
+        print(str(msg))
+        print(api_url)
+        print("Aqui:  " ,json.dumps(msg,indent=4))
+    
     requests.post(api_url, headers = HEADERS, json=msg)
     # Result_id = response.json()
-    # if (test_end_point_print):
+    # if config_info['DEFAULT']['DEBUG'] == "on":
     #     print(json.dumps(Result_id,indent=4))   
     return ''
 
@@ -142,11 +152,12 @@ def main_cycle():
     global status_config
     global Working
     if CONFIG_OF_EXP != None:
-        if test :
+        if config_info['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
         while True:
             if not Working:
-                if test :
+                if config_info['DEFAULT']['DEBUG'] == "on":
+
                     print("Esta a passar pelo if none\n")
                 GetExecution()
                 if test:
@@ -175,7 +186,9 @@ if __name__ == "__main__":
     while True:
         try:
             GetConfig()
-            if interface.do_init(CONFIG_OF_EXP["config"]) :
+
+            if interface.do_init(CONFIG_OF_EXP["config"],config_info['DEFAULT']['DEBUG']) :
+                print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
                 main_cycle()
             else:
                 print ("Experiment not found")
