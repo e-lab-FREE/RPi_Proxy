@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+
 import serial
 import json
 import re
@@ -13,6 +14,7 @@ serial_port = None
 dbuging = "off"
 time_point = datetime.now()
 dt=1
+
 
 #status, config
 
@@ -45,7 +47,7 @@ def receive_data_from_exp():
         time_point = datetime.now()
         return "DATA_START"
     elif "END" in pic_message:
-        print("INFO FOUND\nEXPERIMENTE ENDED")
+        print("ENCONTREI INFO\nEXPERIENCIA ACABOU")
         return "DATA_END"
     else:
         """ AQUI SÃO OS OUTPUTS DA EXPERIÊNÇIA JÁ CONVERTIDOS
@@ -60,7 +62,6 @@ def receive_data_from_exp():
            print("Mensagem em branco !!!!!!!!")
            pic_message = serial_port.read_until(b'\r')
            pic_message = pic_message.decode(encoding='ascii')
-        
         pic_message = pic_message.strip()
         pic_message = pic_message.split("\t")
         while True:
@@ -75,11 +76,15 @@ def receive_data_from_exp():
                 pic_message = pic_message.strip()  ## 
                 pic_message = pic_message.split("\t") ## correcção do bug 
                 # print(pic_message)
+
         #pic_message = '{"adc_value1": "testing"}'
         return pic_message
+        # pode ser que tem que adcionar mais parametros como: sample number, Date, time, millesecond, erros das variáveis (tensão, corrente e pressão)
+
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(config_json, serial_port):
+
     print("SEARCHING FOR THE PIC IN THE SERIE PORT")
     try:
         pic_message = serial_port.read_until(b'\r')
@@ -90,13 +95,12 @@ def try_to_lock_experiment(config_json, serial_port):
         print("\-------- --------/\n")
     except:
         print("TODO: send error to server, pic is not conected")
-
     match = re.search(r"^(IDS)\s(?P<exp_name>[^ \t]+)\s(?P<exp_state>[^ \t]+)$",pic_message)
     print(config_json['id'])
     print(match.group("exp_name"))
     if match.group("exp_name") == config_json['id']:
         #LOG_INFO
-        print("PIC FOUND ON THE SERIAL PORT")
+        print("ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
         if match.group("exp_state") == "STOPED":
             return True
         else:
@@ -107,7 +111,7 @@ def try_to_lock_experiment(config_json, serial_port):
                 return False
     else:
         #LOG INFO
-        print("PIC NOT FOUND ON THE SERIAL PORT")
+        print("NAO ENCONTREI O PIC QUE QUERIA NA PORTA SERIE")
         return False
 
 #DO_INIT - Abre a ligacao com a porta serie
@@ -121,7 +125,7 @@ def do_init(config_json,dbug):
     dbuging = dbug
     if 'serial_port' in config_json:
         for exp_port in config_json['serial_port']['ports_restrict']:
-            print("TRYING TO OPEN THE SERIAL PORT: "+exp_port+"\n")
+            print("A tentar abrir a porta"+exp_port+"\n")
             try:
                 #alterar esta função para aceitar mais definições do json
                 #é preciso uma função para mapear os valores para as constantes da porta série
@@ -131,7 +135,6 @@ def do_init(config_json,dbug):
                                                     timeout = int(config_json['serial_port']['death_timeout']))
             except serial.SerialException:
                 #LOG_WARNING: couldn't open serial port exp_port. Port doesnt exist or is in use
-                print("ERRO: Could not open serial port!!")
                 pass
             else:
                 if try_to_lock_experiment(config_json, serial_port) :
@@ -141,12 +144,12 @@ def do_init(config_json,dbug):
         
         if serial_port.is_open:
             #LOG_INFO : EXPERIMENT FOUND. INITIALIZING EXPERIMENT
-            print("I FOUND THE SERIAL PORT\n")
+            print("Consegui abrir a porta e encontrar a experiencia\n")
             #Mudar para números. Return 0 e mandar status
             return True
         else:
             #SUBSTITUIR POR LOG_ERROR : couldn't find the experiment in any of the configured serial ports
-            print("I COULDN'T OPEN THE DOOR AND FIND THE EXPERIENCE\n")
+            print("Nao consegui abrir a porta e encontrar a experiencia\n")
             #return -1
             return False
     else:
@@ -156,6 +159,7 @@ def do_init(config_json,dbug):
 
 def do_config(config_json) :
     global serial_port
+
     global dt 
     dt = int(int(config_json["config"]["sigperiod"])/int(config_json["config"]["numsamps"]))
     cmd = exp.msg_to_config_experiment(config_json)
