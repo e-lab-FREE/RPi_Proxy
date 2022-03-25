@@ -34,6 +34,15 @@ HEADERS = {
   "Content-Type": "application/json"
 }
 
+def SendInfoAboutExecution(id):
+    global CONFIG_OF_EXP
+    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
+    # msg = {"secret":SEGREDO}
+    print(api_url)
+    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
+    print(response)
+    return ''
+
 def send_exp_data():
     global SAVE_DATA
     global Working
@@ -72,6 +81,8 @@ def Send_Config_to_Pic(myjson):
     print("Recebi mensagem de configurestart. A tentar configurar pic")
     actual_config, config_feita_correcta = interface.do_config(myjson)
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
+        print(myjson["id"])
+        SendInfoAboutExecution(myjson["id"])
         data_thread = threading.Thread(target=send_exp_data,daemon=True)
         print("PIC configurado.\n")
         if interface.do_start():                            #tentar começar experiencia
@@ -96,8 +107,10 @@ def GetConfig():
     global CONFIG_OF_EXP
     api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
-    response =  requests.get(api_url, headers ={"Authentication":"Secret estou bem"})
-    CONFIG_OF_EXP = response.json()["experiment"]
+    print(api_url)
+    response =  requests.get(api_url, headers =HEADERS)
+    # print(response.json())
+    CONFIG_OF_EXP = response.json()
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(json.dumps(CONFIG_OF_EXP,indent=4))
     return ''
@@ -176,6 +189,7 @@ if __name__ == "__main__":
     while True:
         try:
             GetConfig()
+            print ("all good")
             if interface.do_init(CONFIG_OF_EXP["config"],config_info['DEFAULT']['DEBUG']) :
                 print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
                 main_cycle()
