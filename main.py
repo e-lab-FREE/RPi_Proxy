@@ -110,6 +110,7 @@ def GetConfig():
     print(api_url)
     response =  requests.get(api_url, headers =HEADERS)
     # print(response.json())
+    print(response.json())
     CONFIG_OF_EXP = response.json()
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(json.dumps(CONFIG_OF_EXP,indent=4))
