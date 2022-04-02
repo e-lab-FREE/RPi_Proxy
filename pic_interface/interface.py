@@ -11,6 +11,18 @@ serial_port = None
 dbuging = "off"
 #status, config
 
+def send_message_to_PIC(msg):
+    global serial_port
+    try: 
+        serial_port.reset_input_buffer()
+        serial_port.write(b'\r')
+        serial_port.write(msg)
+        serial_port.flush()
+        return True
+    except:
+        print ("FATAL ERRO: Could not write on the serial PORT\n\r")
+        return False
+
 def print_serial():
     global serial_port
 
@@ -127,8 +139,7 @@ def do_config(config_json) :
     global serial_port
     cmd = exp.msg_to_config_experiment(config_json)
     if cmd is not False:
-        serial_port.reset_input_buffer()
-        serial_port.write(cmd)
+        send_message_to_PIC(cmd)
     else:
         print("ERROR: on the config of the experiment")
         return -1, False 
@@ -166,8 +177,7 @@ def do_start() :
     
     cmd = "str\r"
     cmd = cmd.encode(encoding='ascii')
-    serial_port.reset_input_buffer()
-    serial_port.write(cmd)
+    send_message_to_PIC(cmd)
     while True :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC A CONFIRMAR STROK:\n")
@@ -191,9 +201,7 @@ def do_stop() :
     print("Try to stop the experiment\n")
     cmd = "stp\r"
     cmd = cmd.encode(encoding='ascii')
-    serial_port.reset_input_buffer()
-    serial_port.flush()
-    serial_port.write(cmd)
+    send_message_to_PIC(cmd)
     while True :
         try:
             pic_message = serial_port.read_until(b'\r')
@@ -211,8 +219,7 @@ def do_stop() :
         elif len(pic_message.decode(encoding='ascii').split("\t")) == 3 and  pic_message.decode(encoding='ascii').split("\t")[2] in ["CONFIGURED\r","RESETED\r"] :
         # elif re.search(r"(CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None :
             print("There is garbage in the serial port try the command again!")
-            serial_port.reset_input_buffer()
-            serial_port.write(cmd)
+            send_message_to_PIC(cmd)
             # Maybe create a counter to give a time out if the pic is not working correct
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
         #tem de se apontar aos casos especificos -_-
@@ -224,8 +231,7 @@ def do_reset() :
     print("A tentar fazer reset da experiencia\n")
     cmd = "rst\r"
     cmd = cmd.encode(encoding='ascii')
-    serial_port.reset_input_buffer()
-    serial_port.write(cmd)
+    send_message_to_PIC(cmd)
     while True :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC A CONFIRMAR RSTOK:\n")
