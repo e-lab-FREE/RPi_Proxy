@@ -13,7 +13,7 @@ import re
 lock = threading.Lock()
 
 
-config_info = configparser.ConfigParser()
+config_info = configparser.ConfigParser(interpolation=None)
 config_info.read('server_info.ini')
 
 
