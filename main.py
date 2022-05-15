@@ -1,4 +1,4 @@
-import requests
+import http.client
 import json
 from datetime import datetime
 import importlib
@@ -6,12 +6,11 @@ import threading
 import time
 import configparser
 import serial
-import json
 import re
 
 
 lock = threading.Lock()
-
+conn = None
 config_info = configparser.ConfigParser()
 config_info.read('server_info.ini')
 
@@ -29,17 +28,19 @@ Waiting_for_config = True
 
 interface = None
 
-HEADERS = { 
-  "Authentication": str(config_info['DEFAULT']['SECRET']), 
+HEADERS = {
+  "Authentication": str(config_info['DEFAULT']['SECRET']),
   "Content-Type": "application/json"
 }
 
 def SendInfoAboutExecution(id):
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
+    api_url = "/api/v1/execution/"+str(id)+"/status"
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
+    payload = json.dumps({"status": "R"})
+    conn.request("PATCH",api_url,payload,headers=HEADERS)
+    response = json.loads(conn.getresponse().read().decode('utf8'))
     print(response)
     return ''
 
@@ -61,7 +62,7 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-            
+
             SAVE_DATA.append(exp_data)
             send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
             SendPartialResult(send_message)
@@ -72,7 +73,7 @@ def send_exp_data():
             next_execution = {}
             SAVE_DATA=[]
             time.sleep(0.00001)
-            return 
+            return
 
 
 def Send_Config_to_Pic(myjson):
@@ -95,7 +96,7 @@ def Send_Config_to_Pic(myjson):
             send_mensage = {"reply_id": "2","status":"Experiment Running"}
         else :
             send_mensage = {"reply_id": "2", "error":"-1", "status":"Experiment could not start"}
-    
+
     else:
         send_mensage = {"reply_id": "2", "error":"-2", "status":"Experiment could not be configured"}
     return send_mensage
@@ -105,24 +106,27 @@ def Send_Config_to_Pic(myjson):
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
+    api_url = "/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.get(api_url, headers =HEADERS)
-    # print(response.json())
-    print(response.json())
-    CONFIG_OF_EXP = response.json()
+    conn.request("GET",api_url,headers=HEADERS)
+    response = json.loads(conn.getresponse().read().decode('utf8'))
+    print(response)
+    CONFIG_OF_EXP = response
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(json.dumps(CONFIG_OF_EXP,indent=4))
     return ''
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
-    response =  requests.get(api_url,headers = HEADERS)
-    if (response.json()['protocol']['config'] !=None):
-        print(response.json())
-        next_execution = response.json()
+    api_url = "/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
+
+    conn.request("GET",api_url,headers=HEADERS)
+    response = json.loads(conn.getresponse().read().decode('utf8'))
+
+    if (response['protocol']['config'] !=None):
+        print(response)
+        next_execution = response
     if config_info['DEFAULT']['DEBUG'] == "on":
         print("REQUEST\n")
         print(json.dumps(next_execution,indent=4))
@@ -132,17 +136,19 @@ def GetExecution():
 def SendPartialResult(msg):
     global next_execution
     # print(next_execution)
-    
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
+
+    api_url = "/api/v1/result"
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(str(msg))
         print(api_url)
         print("Aqui:  " ,json.dumps(msg,indent=4))
-    
-    requests.post(api_url, headers = HEADERS, json=msg)
+    payload = json.dumps(msg)
+    conn.request("POST",api_url,payload,headers=HEADERS)
+    response = json.loads(conn.getresponse().read().decode('utf8'))
+    print(response)
     # Result_id = response.json()
     # if config_info['DEFAULT']['DEBUG'] == "on":
-    #     print(json.dumps(Result_id,indent=4))   
+    #     print(json.dumps(Result_id,indent=4))
     return ''
 
 # if __name__ == "__main__":
@@ -172,7 +178,7 @@ def main_cycle():
                 save_execution =next_execution.get("config",None)
                 if save_execution != None:
                     print(json.dumps(save_execution))
-                # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
+                # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq
                     status_config=Send_Config_to_Pic(next_execution)
                 if test:
                     print("O valor do Working é: "+str(Working))
@@ -189,6 +195,7 @@ if __name__ == "__main__":
     interface = importlib.import_module("pic_interface.interface")
     while True:
         try:
+            conn = http.client.HTTPConnection(config_info['DEFAULT']['SERVER'],port=config_info['DEFAULT']['PORT'])
             GetConfig()
             print ("all good")
             if interface.do_init(CONFIG_OF_EXP["config"],config_info['DEFAULT']['DEBUG']) :
