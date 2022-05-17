@@ -2,6 +2,7 @@
 **/*.ini
 **/*.ini.tmp
 **/*.template
+overlay.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
