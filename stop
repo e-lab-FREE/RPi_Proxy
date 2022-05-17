@@ -1,0 +1,6 @@
+#!/bin/bash
+# stop video streaming and FREE sever communication
+pkill -f video-stream
+pkill -f main.py
+pkill -f ffmpeg
+pkill -f gst-launch-1.0
