@@ -49,7 +49,12 @@ def SendInfoAboutExecution(id):
     api_url = BASE_API_URL + "execution/" + str(id) + "/status"
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
+    retries = 0
+    while retries < 5:
+        try:
+            response = requests.patch(api_url, headers =HEADERS, json={"status": "R"}, timeout=TIMEOUT)
+        except requests.exceptions.RequestException:
+            retries += 1
     print(response)
     return ''
 
@@ -71,7 +76,6 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-
             SAVE_DATA.append(exp_data)
             send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
             SendPartialResult(send_message)
@@ -118,7 +122,7 @@ def GetConfig():
     api_url = BASE_API_URL + "apparatus/" + config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.get(api_url, headers =HEADERS)
+    response =  requests.get(api_url, headers=HEADERS, timeout=TIMEOUT)
     # print(response.json())
     print(response.json())
     CONFIG_OF_EXP = response.json()
@@ -129,7 +133,7 @@ def GetConfig():
 def GetExecution():
     global next_execution
     api_url = BASE_API_URL + "apparatus/" + config_info['DEFAULT']['APPARATUS_ID'] + "/nextexecution"
-    response =  requests.get(api_url,headers = HEADERS)
+    response =  requests.get(api_url, headers=HEADERS, timeout=TIMEOUT)
     if (response.json()['protocol']['config'] !=None):
         print(response.json())
         next_execution = response.json()
@@ -149,7 +153,13 @@ def SendPartialResult(msg):
         print(api_url)
         print("Aqui:  " ,json.dumps(msg,indent=4))
 
-    requests.post(api_url, headers = HEADERS, json=msg)
+    retries = 0
+    while retries < 5:
+        try:
+            requests.post(api_url, headers=HEADERS, json=msg, timeout=TIMEOUT)
+        except requests.exceptions.RequestException:
+            retries += 1
+
     # Result_id = response.json()
     # if config_info['DEFAULT']['DEBUG'] == "on":
     #     print(json.dumps(Result_id,indent=4))
@@ -193,12 +203,14 @@ def main_cycle():
     return ''
 
 if __name__ == "__main__":
+    TIMEOUT = 6 # requests timeout
     BASE_API_URL = config_info['DEFAULT']['SERVER'] + "/api/v1/"
     print("[Starting] Experiment Server Starting...")
     # global next_execution
     connected = None
     interface = importlib.import_module("pic_interface.interface")
-    while True:
+    retries = 0
+    while retries < 20:
         try:
             GetConfig()
             print ("all good")
@@ -208,13 +220,19 @@ if __name__ == "__main__":
             else:
                 print ("Experiment not found")
         except serial.SerialException:
-            print("*ERROR: Could not open serial port. Trying again after 10s...")
-            time.sleep(10)
+            print("*ERROR: Could not open serial port! Trying again in {}s...".format(TIMEOUT))
+            time.sleep(TIMEOUT)
+            retries += 1
+        except requests.exceptions.RequestException:
+            print("*ERROR: Connection error! Trying again in {}s...".format(TIMEOUT))
+            time.sleep(TIMEOUT)
+            retries += 1
         except:
             #LOG ERROR
-            print("Failed connecting to FREE server. Trying again after 10s...")
+            print("*ERROR: Unexpected error! Trying again in {}s...".format(TIMEOUT))
             #So faz shutdown do socket se este chegou a estar connected
-            time.sleep(10)
+            time.sleep(TIMEOUT)
+            retries += 1
 
 
 
