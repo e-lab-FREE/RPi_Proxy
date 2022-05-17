@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 croncmd="$SCRIPT_DIR/run > /dev/null 2>&1"
-cronjob="*/2 * * * * $croncmd"
+cronjob="*/1 * * * * $croncmd"
 # avoids duplicated insertion
 ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
