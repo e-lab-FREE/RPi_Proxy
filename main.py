@@ -1,19 +1,29 @@
-import requests
-import json
-from datetime import datetime
+import configparser
 import importlib
+import json
+import os
+import re
+import requests
+import serial
+import sys
 import threading
 import time
-import configparser
-import serial
-import json
-import re
+from datetime import datetime
 
 
 lock = threading.Lock()
 
-config_info = configparser.ConfigParser()
-config_info.read('server_info.ini')
+config_info = configparser.ConfigParser(interpolation=None)
+SCRIPT_DIR = os.path.realpath(os.path.dirname(__file__))
+config_file = os.path.join(SCRIPT_DIR, 'server_info.ini')
+if not os.path.isfile(config_file):
+    print("*ERROR: config file not found!\n\tRequired file is {}".format(config_file))
+    sys.exit(1)
+try:
+    config_info.read(config_file)
+except:
+    print("*ERROR: parsing ini file failed!")
+    sys.exit(1)
 
 FORMAT = 'utf-8'
 
@@ -29,14 +39,14 @@ Waiting_for_config = True
 
 interface = None
 
-HEADERS = { 
-  "Authentication": str(config_info['DEFAULT']['SECRET']), 
+HEADERS = {
+  "Authentication": str(config_info['DEFAULT']['SECRET']),
   "Content-Type": "application/json"
 }
 
 def SendInfoAboutExecution(id):
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
+    api_url = BASE_API_URL + "execution/" + str(id) + "/status"
     # msg = {"secret":SEGREDO}
     print(api_url)
     response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
@@ -61,7 +71,7 @@ def send_exp_data():
         except:
             pass
         if exp_data != "DATA_END":
-            
+
             SAVE_DATA.append(exp_data)
             send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
             SendPartialResult(send_message)
@@ -72,7 +82,7 @@ def send_exp_data():
             next_execution = {}
             SAVE_DATA=[]
             time.sleep(0.00001)
-            return 
+            return
 
 
 def Send_Config_to_Pic(myjson):
@@ -95,7 +105,7 @@ def Send_Config_to_Pic(myjson):
             send_mensage = {"reply_id": "2","status":"Experiment Running"}
         else :
             send_mensage = {"reply_id": "2", "error":"-1", "status":"Experiment could not start"}
-    
+
     else:
         send_mensage = {"reply_id": "2", "error":"-2", "status":"Experiment could not be configured"}
     return send_mensage
@@ -105,7 +115,7 @@ def Send_Config_to_Pic(myjson):
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
+    api_url = BASE_API_URL + "apparatus/" + config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     print(api_url)
     response =  requests.get(api_url, headers =HEADERS)
@@ -118,7 +128,7 @@ def GetConfig():
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
+    api_url = BASE_API_URL + "apparatus/" + config_info['DEFAULT']['APPARATUS_ID'] + "/nextexecution"
     response =  requests.get(api_url,headers = HEADERS)
     if (response.json()['protocol']['config'] !=None):
         print(response.json())
@@ -132,17 +142,17 @@ def GetExecution():
 def SendPartialResult(msg):
     global next_execution
     # print(next_execution)
-    
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
+
+    api_url = BASE_API_URL + "result"
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(str(msg))
         print(api_url)
         print("Aqui:  " ,json.dumps(msg,indent=4))
-    
+
     requests.post(api_url, headers = HEADERS, json=msg)
     # Result_id = response.json()
     # if config_info['DEFAULT']['DEBUG'] == "on":
-    #     print(json.dumps(Result_id,indent=4))   
+    #     print(json.dumps(Result_id,indent=4))
     return ''
 
 # if __name__ == "__main__":
@@ -172,7 +182,7 @@ def main_cycle():
                 save_execution =next_execution.get("config",None)
                 if save_execution != None:
                     print(json.dumps(save_execution))
-                # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
+                # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq
                     status_config=Send_Config_to_Pic(next_execution)
                 if test:
                     print("O valor do Working é: "+str(Working))
@@ -183,6 +193,7 @@ def main_cycle():
     return ''
 
 if __name__ == "__main__":
+    BASE_API_URL = config_info['DEFAULT']['SERVER'] + "/api/v1/"
     print("[Starting] Experiment Server Starting...")
     # global next_execution
     connected = None
@@ -196,9 +207,12 @@ if __name__ == "__main__":
                 main_cycle()
             else:
                 print ("Experiment not found")
+        except serial.SerialException:
+            print("*ERROR: Could not open serial port. Trying again after 10s...")
+            time.sleep(10)
         except:
             #LOG ERROR
-            print("Faill to connect to the Server. Trying again after 10 s")
+            print("Failed connecting to FREE server. Trying again after 10s...")
             #So faz shutdown do socket se este chegou a estar connected
             time.sleep(10)
 
