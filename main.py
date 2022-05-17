@@ -56,6 +56,7 @@ def SendInfoAboutExecution(id):
             break
         except requests.exceptions.RequestException:
             retries += 1
+            time.sleep(1)
     print(response)
     return ''
 
@@ -161,6 +162,7 @@ def SendPartialResult(msg):
             break
         except requests.exceptions.RequestException:
             retries += 1
+            time.sleep(1)
 
     # Result_id = response.json()
     # if config_info['DEFAULT']['DEBUG'] == "on":
