@@ -53,6 +53,7 @@ def SendInfoAboutExecution(id):
     while retries < 5:
         try:
             response = requests.patch(api_url, headers =HEADERS, json={"status": "R"}, timeout=TIMEOUT)
+            break
         except requests.exceptions.RequestException:
             retries += 1
     print(response)
@@ -157,6 +158,7 @@ def SendPartialResult(msg):
     while retries < 5:
         try:
             requests.post(api_url, headers=HEADERS, json=msg, timeout=TIMEOUT)
+            break
         except requests.exceptions.RequestException:
             retries += 1
 
