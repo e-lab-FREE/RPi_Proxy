@@ -4,7 +4,13 @@
 # v4l2-ctl -d /dev/video0 --list-formats-ext
 
 # source video stream ini file
-. $0.ini
+if [ -f "$0.ini" ]; then
+    . $0.ini
+else
+    echo "$0.ini does not exist."
+    exit 1
+fi
+
 
 # get Debian/Raspian OS version
 osver=`cat /etc/debian_version`
