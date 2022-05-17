@@ -11,6 +11,11 @@ else
     exit 1
 fi
 
+# check if overlay video file exist
+overlay=""
+if [ -f "overlay.png" ]; then
+    overlay="! gdkpixbufoverlay location=overlay.png"
+fi
 
 # get Debian/Raspian OS version
 osver=`cat /etc/debian_version`
@@ -30,7 +35,7 @@ then
           -pix_fmt yuv420p -an -c:v libx264 -profile:v baseline  -tune zerolatency -flags global_header -bsf dump_extra \
           -f rtp" rtp://$video_server:$video_port/?pkt_size=1000
 elif [ "$osver" -gt "10" ]; then
-    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay time-format="%x - %X" ! videoconvert ! v4l2h264enc ! 'video/x-h264,level=(string)3' ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
+    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay color=4294967040 time-format="%x - %X" $overlay ! videoconvert ! v4l2h264enc ! 'video/x-h264,level=(string)3' ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
 else
-    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay time-format="%x - %X" ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
+    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay color=4294967040 time-format="%x - %X" $overlay ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
 fi
