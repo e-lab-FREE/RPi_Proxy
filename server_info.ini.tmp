@@ -1,6 +1,15 @@
 [DEFAULT]
-SERVER=https://<fqdn>:<port>
+SERVER=<proto>://<ip_or_fqdn>:<port>
 APPARATUS_ID=?
 EXPERIMENT_ID=1
 SECRET=<supersecret>
 DEBUG=off
+
+VIDEO_SERVER=<ip_or_fqdn>
+VIDEO_PORT=60??
+
+USB_CAMERA=/dev/video0
+VIDEO_WIDTH=640
+VIDEO_HEIGHT=480
+VIDEO_FRAME=10
+VIDEO_ENGINE=gst

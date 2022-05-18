@@ -1,17 +1,18 @@
 #!/bin/bash
-# you can find your proper video device and resolutions with the following commands:
+# TIP: you can find your proper video device and resolutions with the following commands:
 # v4l2-ctl --list-devices
 # v4l2-ctl -d /dev/video0 --list-formats-ext
 
-# source video stream ini file
-if [ -f "$0.ini" ]; then
-    . $0.ini
+# source ini file (skipping the first line)
+ini_file="server_info.ini"
+if [ -f "$ini_file" ]; then
+    source <(awk '(NR>1)' $ini_file)
 else
-    echo "$0.ini does not exist."
+    echo "$ini_file not found"
     exit 1
 fi
 
-# check if overlay video file exist
+# check if overlay image file exist
 overlay=""
 if [ -f "overlay.png" ]; then
     overlay="! gdkpixbufoverlay location=overlay.png"
@@ -28,14 +29,21 @@ pkill ffmpeg
 # start udp streaming and choose codec according to OS version
 if [ "$engine" = "ffmpeg" ]
 then
-    font_size=40
-    ffmpeg -s $video_width\x$video_height -f video4linux2 -i $usb_camera -r $video_frame \
-          -vf "drawtext = fontfile = /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf: \
-          text ='$apparatus_location ($apparatus_name $apparatus_id) - %{localtime\:%X}': :fontsize=$font_size:fontcolor=black:box=1:boxcolor=white@0.5$ \
-          -pix_fmt yuv420p -an -c:v libx264 -profile:v baseline  -tune zerolatency -flags global_header -bsf dump_extra \
-          -f rtp" rtp://$video_server:$video_port/?pkt_size=1000
+    ffmpeg -s $VIDEO_WIDTH\x$VIDEO_HEIGHT -f video4linux2 -i $USB_CAMERA -r $VIDEO_FRAME \
+        -pix_fmt yuv420p -an -c:v libx264 -profile:v baseline -tune zerolatency \
+        -flags global_header -bsf dump_extra -f rtp \
+        "rtp://$VIDEO_SERVER:$VIDEO_PORT/?pkt_size=1000"
 elif [ "$osver" -gt "10" ]; then
-    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay color=4294967040 time-format="%x - %X" $overlay ! videoconvert ! v4l2h264enc ! 'video/x-h264,level=(string)3' ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
+    gst-launch-1.0 v4l2src device=$USB_CAMERA \
+        ! video/x-raw,width=$VIDEO_WIDTH,height=$VIDEO_HEIGHT,framerate=$VIDEO_FRAME/1 \
+        ! clockoverlay color=4294967040 time-format="%x - %X" $overlay \
+        ! videoconvert ! v4l2h264enc ! 'video/x-h264,level=(string)3' \
+        ! h264parse ! rtph264pay config-interval=1 pt=126 \
+        ! udpsink host=$VIDEO_SERVER port=$VIDEO_PORT async=false
 else
-    gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame/1 ! clockoverlay color=4294967040 time-format="%x - %X" $overlay ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=126 ! udpsink host=$video_server port=$video_port async=false
+    gst-launch-1.0 v4l2src device=$USB_CAMERA \
+        ! video/x-raw,width=$VIDEO_WIDTH,height=$VIDEO_HEIGHT,framerate=$VIDEO_FRAME/1 \
+        ! clockoverlay color=4294967040 time-format="%x - %X" $overlay \
+        ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=126 \
+        ! udpsink host=$VIDEO_SERVER port=$VIDEO_PORT async=false
 fi
