@@ -54,7 +54,7 @@ SECRET = test_1
 DEBUG = on
 ```
 
-*  `strat-video.ini` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camara.
+*  `video-stream.ini` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camara.
 
 
 ```ini
