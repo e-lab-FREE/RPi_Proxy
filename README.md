@@ -42,7 +42,7 @@ pip3 install pyserial
 ## How to connect to [FREE_Web](https://github.com/e-lab-FREE/FREE_Web)
 To be able to comunicate with your main server, you need to change the configuration of the proxy you need to edit the following file:
 
-* `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, EXPERIMENT_ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
+* `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
 
 ```ini
 [DEFAULT]
