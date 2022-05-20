@@ -49,7 +49,6 @@ To be able to comunicate with your main server, you need to change the configura
 SERVER = IP_FREE_Web_server
 PORT = 5000
 APPARATUS_ID = 1
-EXPERIMENT_ID = 1
 SECRET = test_1
 DEBUG = on
 ```
