@@ -4,7 +4,7 @@ This is a simple proxy that communicate with the main server.
 ## How to install
 
 ```
-wget https://github.com/e-lab-FREE/RPi_Proxy/releases/latest/download/RPi_Proxy_0_5_0.zip -O RPi_Proxy.zip
+wget https://github.com/e-lab-FREE/RPi_Proxy/releases/latest/download/RPi_Proxy_0_5_1.zip -O RPi_Proxy.zip
 ```
 Unzip the package:
 ```
