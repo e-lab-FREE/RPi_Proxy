@@ -1,12 +1,16 @@
 # RPi Proxy
 This is a simple proxy that communicate with the main server. 
 
-## Requirements
+## How to install
 
-Install the following:
 ```
-sudo  apt-get install git
+wget https://github.com/e-lab-FREE/RPi_Proxy/releases/latest/download/RPi_Proxy_0_5_1.zip -O RPi_Proxy.zip
 ```
+Unzip the package:
+```
+unzip -o RPi_Proxy.zip
+```
+## Requirements
 
 For the video stream:
 ```
@@ -38,32 +42,41 @@ pip3 install pyserial
 ## How to connect to [FREE_Web](https://github.com/e-lab-FREE/FREE_Web)
 To be able to comunicate with your main server, you need to change the configuration of the proxy you need to edit the following file:
 
-* `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, EXPERIMENT_ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
+* `server_info.ini` - change the SERVER, PORT with the corresponding to your server and the APPARATUS ID, SECRET corresponding to the information on the database of your main server ([FREE_Web](https://github.com/e-lab-FREE/FREE_Web))
 
 ```ini
 [DEFAULT]
-SERVER = elab1.ist.utl.pt
+SERVER = IP_FREE_Web_server
 PORT = 5000
 APPARATUS_ID = 1
-EXPERIMENT_ID = 1
 SECRET = test_1
 DEBUG = on
 ```
 
-*  `strat-video.sh` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camara.
+*  `video-stream.ini` - change the video_server and video_port with the info of your video server (with janus installed). Also change the following parameters: usb_camera, video_width, video_height, video_height and video_frame, with the ones that your camara.
 
 
-```sh
+```ini
 #!/bin/bash
-video_server=elab1.ist.utl.pt
-video_port=8006
-usb_camera=/dev/video0
-video_width=1280
-video_height=720
-video_frame=30/1
+#variables matching information of FREE server
+video_server="localhost"
+video_port=6002
+apparatus_location="Lisboa"
+apparatus_name="pendulum"
+apparatus_id=1
 
-killall gst-launch-1.0
-gst-launch-1.0 v4l2src device=$usb_camera ! video/x-raw,width=$video_width,height=$video_height,framerate=$video_frame ! clockoverlay time-format="%x - %X" ! videoconvert ! omxh264enc ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink host=$video_server port=$video_port async=false 
+# font size
+font_size=40
+
+#local video configuration
+usb_camera=/dev/video0
+video_width=640
+video_height=480
+#video_frame=30/1
+video_frame=15
+
+#engine=ffmpeg
+engine=gstream
 ```
 Some usefull comands:
 ```
