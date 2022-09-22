@@ -28,9 +28,8 @@ ini_file.read('server_info.ini')
 '''
 Comunication URL and Endpoints of FREE server
 '''
-FREE_Version = "0.6.0"
-API_Version = "v1"
-Base_URL = ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+API_Version
+
+# Base_URL = ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+API_Version
 ListOfEndpoints={
     
     "aparatus":   {
@@ -43,11 +42,6 @@ ListOfEndpoints={
     },
     "result" : "/result",
     "version": "/version"
-}
-
-HEADERS = { 
-  "Authentication": str(ini_file['APPARATUS']['SECRET']), 
-  "Content-Type": "application/json"
 }
 
 
@@ -67,78 +61,113 @@ lock = threading.Lock()
 '''
  ----- Comunications with FREE SERVER -----
 '''
+class ComunicatedWithFREEServer:
+    FREE_Version = "0.6.0"
+    API_Version = "v1"
+    ListOfEndpoints={
+        "aparatus":   {
+            "deflaut" : "/apparatus/"+ini_file['APPARATUS']['ID'],
+            "next": "/nextexecution",            
+        },
+        "execution" : { 
+            "deflaut" :"/execution/",
+            "status" : "/status"
+        },
+        "result" : "/result",
+        "version": "/version"
+    }
 
-def GetConfig():
+    def __init__(self,ini_file):
+        self.URL =  ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+self.API_Version
+        self.Headers = { 
+            "Authentication": str(ini_file['APPARATUS']['SECRET']), 
+            "Content-Type": "application/json"
+            }
+        self.ExecutionConfig = 0
+        return
+
+    def UpdateExecutionConfig(self):
+        
+        return
+
+    def SendREQUEST(self,end_point,request_type,send_JSON={}):
+        if ini_file['DEFAULT']['DEBUG'] == "on:":
+            print("Trying to send info to the "+self.URL)
+            if send_JSON.keys() != None:
+                print(str(send_JSON))
+                print("Sending JSON: \n\r" ,json.dumps(send_JSON,indent=4))
+        else:
+            pass
+
+        try:
+            if request_type == "GET":
+                response = requests.get(self.URL+end_point,headers = self.Headers)
+            elif request_type == "POST":
+                response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON)
+            elif request_type == "PATCH":
+                response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON)
+        except:
+            print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
+        
+        if ini_file['DEFAULT']['DEBUG'] == "on":
+            print(json.dumps(response.json(),indent=4))
+
+        return response.json()
+    
+    def VerifyVersionFREE(self):
+
+        api_url = ListOfEndpoints['version']
+        
+        response =  self.SendREQUEST(api_url,"GET")
+
+        if response['version'] == self.FREE_Version:
+            return  True, response['version']
+        else: 
+            return False, response['version']
+
+
+
+def GetConfig(ComFREE):
     global CONFIG_OF_EXP
 
-    api_url = Base_URL+ListOfEndpoints['aparatus']['deflaut']
+    api_url = ListOfEndpoints['aparatus']['deflaut']
 
-    response = requests.get(api_url, headers =HEADERS)
+    response = ComFREE.SendREQUEST(api_url,"GET")
 
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print(response.json())
-
-    CONFIG_OF_EXP = response.json()
-
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print(json.dumps(CONFIG_OF_EXP,indent=4))
+    CONFIG_OF_EXP = response
 
     return ''
 
-def GetExecution():
+def GetExecution(ComFREE):
 
-    api_url = Base_URL+ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
+    api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
 
-    response = requests.get(api_url,headers = HEADERS)
+    response = ComFREE.SendREQUEST(api_url,"GET")
 
     if (response.json()['protocol']['config'] !=None):
-        print(response.json())
-        next_execution = response.json()
-
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print("REQUEST\n")
-        print(json.dumps(next_execution,indent=4))
+        print(response)
+        next_execution = response
 
     return next_execution
 
 
-def SendInfoAboutExecution(id,info):
+def SendInfoAboutExecution(ComFREE,id,info):
 
-    api_url = Base_URL+ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+    api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
     
-    if ini_file['DEFAULT']['DEBUG'] == "on:":
-        print(api_url)
-
-    response = requests.patch(api_url, headers =HEADERS,json={"status": info})
-
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print(response)
+    response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
 
     return ''
 
-def SendResult(msg):
+def SendResult(ComFREE,msg):
 
-    api_url = Base_URL+ListOfEndpoints['result']
-
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print(str(msg))
-        print(api_url)
-        print("Sending result:  " ,json.dumps(msg,indent=4))
-    
-    requests.post(api_url, headers = HEADERS, json=msg)
+    api_url = ListOfEndpoints['result']
+   
+    ComFREE.SendREQUEST(api_url,"POST",msg)
 
     return ''
 
-def VerifyVersionFREE():
 
-    api_url = Base_URL+ListOfEndpoints['version']
-
-    
-    response =  requests.get(api_url,headers = HEADERS)
-    response = response.json()
-    if ini_file['DEFAULT']['DEBUG'] == "on":
-        print(response['version'])
-    return response['version']
 
 
 
@@ -219,7 +248,7 @@ def MainCycle():
             if not Working:
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
-                next_execution = GetExecution()
+                next_execution = GetExecution(COMfree)
                 if test:
                     print("\n\nIsto_1 :")
                     print (next_execution)
@@ -237,22 +266,22 @@ if __name__ == "__main__":
     interface = importlib.import_module("pic_interface.interface")
 
     print("Checking Version...")
-
+    COMfree = ComunicatedWithFREEServer(ini_file)
     while True:
         try:
-            Server_Version = VerifyVersionFREE()
-            if Server_Version == FREE_Version:
+            True_False, Server_Version = COMfree.VerifyVersionFREE()
+            if True_False :
                 print("\nVersion match!!\n ")
                 print("[Starting] Experiment Server Starting...")
-                GetConfig()
+                GetConfig(COMfree)
                 print ("all good")
                 if interface.do_init(CONFIG_OF_EXP["config"],ini_file['DEFAULT']['DEBUG']) :
                     print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
-                    MainCycle()
+                    MainCycle(COMfree)
                 else:
                     print ("Experiment not found")
             else:
-                print("Proxy Version is "+FREE_Version+" and is diferent them FREE Server Version "+Server_Version)
+                print("Proxy Version is "+COMfree.FREE_Version+" and is diferent them FREE Server Version "+Server_Version)
         except:
             #LOG ERROR
             print("Faill to connect to the Server. Trying again after 10 s")
