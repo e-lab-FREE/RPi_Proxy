@@ -1,0 +1,10 @@
+[DEFAULT]
+DEBUG = on 
+[FREE]
+PROTOCOL = <proto>
+SERVER = <ip_or_fqdn>
+PORT = <port>
+[APPARATUS]
+ID= ?
+SECRET = <supersecret>
+FORMAT = 'utf-8'

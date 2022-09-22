@@ -1,6 +1,5 @@
 # custom user ini files
 **/*.ini
-**/*.ini.tmp
 **/*.template
 overlay.png
 
