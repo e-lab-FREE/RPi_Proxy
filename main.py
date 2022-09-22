@@ -22,7 +22,9 @@ import re
     SECRET = super_secret
 
 '''
-ini_file = configparser.ConfigParser()
+
+# Prevent ConfigParser interpolation of values
+ini_file = configparser.ConfigParser(interpolation=None)
 ini_file.read('server_info.ini')
 
 '''
