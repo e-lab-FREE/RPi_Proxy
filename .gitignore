@@ -1,3 +1,19 @@
-pic_interface/__pycache__/*
-server_info.ini
-start-video.sh
+# custom user ini files
+**/*.ini
+**/*.ini.tmp
+**/*.template
+overlay.png
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
