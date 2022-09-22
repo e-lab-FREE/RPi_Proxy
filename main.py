@@ -10,51 +10,153 @@ import json
 import re
 
 
-lock = threading.Lock()
+'''
+ Inport the information about the:
+ [DEFAULT]  
+    DEBUG = on 
+ [FREE]
+    SERVER = elab.vps.tecnico.ulisboa.pt
+    PORT = 8003
+ [APPARATUS]
+    ID= 1
+    SECRET = super_secret
 
-config_info = configparser.ConfigParser()
-config_info.read('server_info.ini')
+'''
+ini_file = configparser.ConfigParser()
+ini_file.read('server_info.ini')
 
-FORMAT = 'utf-8'
-
-CONFIG_OF_EXP = []
-next_execution = {}
-status_config= {}
-SAVE_DATA = []
-
-test =False
-test_end_point_print = True
-Working = False
-Waiting_for_config = True
-
-interface = None
+'''
+Comunication URL and Endpoints of FREE server
+'''
+FREE_Version = "0.6.0"
+API_Version = "v1"
+Base_URL = ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+API_Version
+ListOfEndpoints={
+    
+    "aparatus":   {
+        "deflaut" : "/apparatus/"+ini_file['APPARATUS']['ID'],
+        "next": "/nextexecution",            
+    },
+    "execution" : { 
+        "deflaut" :"/execution/",
+        "status" : "/status"
+    },
+    "result" : "/result",
+    "version": "/version"
+}
 
 HEADERS = { 
-  "Authentication": str(config_info['DEFAULT']['SECRET']), 
+  "Authentication": str(ini_file['APPARATUS']['SECRET']), 
   "Content-Type": "application/json"
 }
 
-def SendInfoAboutExecution(id):
+
+CONFIG_OF_EXP = []
+# next_execution = {}
+SAVE_DATA = []
+
+test =False
+Working = False
+
+interface = None
+
+lock = threading.Lock()
+
+
+
+'''
+ ----- Comunications with FREE SERVER -----
+'''
+
+def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
-    # msg = {"secret":SEGREDO}
-    print(api_url)
-    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
-    print(response)
+
+    api_url = Base_URL+ListOfEndpoints['aparatus']['deflaut']
+
+    response = requests.get(api_url, headers =HEADERS)
+
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print(response.json())
+
+    CONFIG_OF_EXP = response.json()
+
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print(json.dumps(CONFIG_OF_EXP,indent=4))
+
     return ''
 
-def send_exp_data():
+def GetExecution():
+
+    api_url = Base_URL+ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
+
+    response = requests.get(api_url,headers = HEADERS)
+
+    if (response.json()['protocol']['config'] !=None):
+        print(response.json())
+        next_execution = response.json()
+
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print("REQUEST\n")
+        print(json.dumps(next_execution,indent=4))
+
+    return next_execution
+
+
+def SendInfoAboutExecution(id,info):
+
+    api_url = Base_URL+ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+    
+    if ini_file['DEFAULT']['DEBUG'] == "on:":
+        print(api_url)
+
+    response = requests.patch(api_url, headers =HEADERS,json={"status": info})
+
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print(response)
+
+    return ''
+
+def SendResult(msg):
+
+    api_url = Base_URL+ListOfEndpoints['result']
+
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print(str(msg))
+        print(api_url)
+        print("Sending result:  " ,json.dumps(msg,indent=4))
+    
+    requests.post(api_url, headers = HEADERS, json=msg)
+
+    return ''
+
+def VerifyVersionFREE():
+
+    api_url = Base_URL+ListOfEndpoints['version']
+
+    
+    response =  requests.get(api_url,headers = HEADERS)
+    response = response.json()
+    if ini_file['DEFAULT']['DEBUG'] == "on":
+        print(response['version'])
+    return response['version']
+
+
+
+'''
+ ----- Comunications with the Experiment Apparatus -----
+'''
+
+def send_exp_data(next_execution):
     global SAVE_DATA
     global Working
-    global next_execution
     global lock
+
     while interface.receive_data_from_exp() != "DATA_START":
         pass
-    # send_message = {"value":"","result_type":"p"}#,"status":"Experiment Starting"}
-    # SendPartialResult(send_message)
+    SendInfoAboutExecution(int(next_execution["id"]),"R")
     while True:
         exp_data = interface.receive_data_from_exp()
-        if config_info['DEFAULT']['DEBUG'] == "on":
+        if ini_file['DEFAULT']['DEBUG'] == "on":
             print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
         try:
             exp_data = json.loads(exp_data)
@@ -64,10 +166,10 @@ def send_exp_data():
             
             SAVE_DATA.append(exp_data)
             send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
-            SendPartialResult(send_message)
+            SendResult(send_message)
         else:
             send_message = {"execution":int(next_execution["id"]),"value":SAVE_DATA,"result_type":"f"}
-            SendPartialResult(send_message)
+            SendResult(send_message)
             Working = False
             next_execution = {}
             SAVE_DATA=[]
@@ -77,143 +179,82 @@ def send_exp_data():
 
 def Send_Config_to_Pic(myjson):
     global Working
-    global Waiting_for_config
+
     print("Recebi mensagem de configurestart. A tentar configurar pic")
     actual_config, config_feita_correcta = interface.do_config(myjson)
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
         print(myjson["id"])
-        SendInfoAboutExecution(myjson["id"])
-        data_thread = threading.Thread(target=send_exp_data,daemon=True)
+        # SendInfoAboutExecution(myjson["id"],"R")
+        data_thread = threading.Thread(target=send_exp_data,args=(myjson,),daemon=True)
         print("PIC configurado.\n")
-        if interface.do_start():                            #tentar começar experiencia
+        if interface.do_start(): 
             Working = True
             data_thread.start()
             time.sleep(0.000001)
             #O JSON dos config parameters está mal e crasha o server. ARRANJAR
             #send_mensage = '{"reply_id": "2","status":"Experiment Running","config_params":"'+str(myjson["config_params"])+'}'
             # Working = True
-            send_mensage = {"reply_id": "2","status":"Experiment Running"}
         else :
-            send_mensage = {"reply_id": "2", "error":"-1", "status":"Experiment could not start"}
+            SendInfoAboutExecution(myjson["id"],"E")
     
     else:
-        send_mensage = {"reply_id": "2", "error":"-2", "status":"Experiment could not be configured"}
-    return send_mensage
+        SendInfoAboutExecution(myjson["id"],"E")
+    return ''
 
 
 
-# REST
-def GetConfig():
+'''
+----- Main Cycle -----
+'''
+
+
+def MainCycle():
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
-    # msg = {"secret":SEGREDO}
-    print(api_url)
-    response =  requests.get(api_url, headers =HEADERS)
-    # print(response.json())
-    print(response.json())
-    CONFIG_OF_EXP = response.json()
-    if config_info['DEFAULT']['DEBUG'] == "on":
-        print(json.dumps(CONFIG_OF_EXP,indent=4))
-    return ''
-
-def GetExecution():
-    global next_execution
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
-    response =  requests.get(api_url,headers = HEADERS)
-    if (response.json()['protocol']['config'] !=None):
-        print(response.json())
-        next_execution = response.json()
-    if config_info['DEFAULT']['DEBUG'] == "on":
-        print("REQUEST\n")
-        print(json.dumps(next_execution,indent=4))
-    return ''
-
-
-def SendPartialResult(msg):
-    global next_execution
-    # print(next_execution)
-    
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
-    if config_info['DEFAULT']['DEBUG'] == "on":
-        print(str(msg))
-        print(api_url)
-        print("Aqui:  " ,json.dumps(msg,indent=4))
-    
-    requests.post(api_url, headers = HEADERS, json=msg)
-    # Result_id = response.json()
-    # if config_info['DEFAULT']['DEBUG'] == "on":
-    #     print(json.dumps(Result_id,indent=4))   
-    return ''
-
-# if __name__ == "__main__":
-#     GetConfig()
-#     GetExecution()
-#     print(json.dumps(next_execution,indent=4))
-#     SendPartialResult()
-
-def main_cycle():
-    global CONFIG_OF_EXP
-    global next_execution
-    global status_config
     global Working
+
     if CONFIG_OF_EXP != None:
-        if config_info['DEFAULT']['DEBUG'] == "on":
+        if ini_file['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
         while True:
             if not Working:
-                if config_info['DEFAULT']['DEBUG'] == "on":
+                if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
-                GetExecution()
+                next_execution = GetExecution()
                 if test:
                     print("\n\nIsto_1 :")
                     print (next_execution)
             time.sleep(0.5)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
-                save_execution =next_execution.get("config",None)
-                if save_execution != None:
-                    print(json.dumps(save_execution))
-                # if save_execution != None:                                 # Estava a passar em cima e não sei bem pq 
-                    status_config=Send_Config_to_Pic(next_execution)
-                if test:
-                    print("O valor do Working é: "+str(Working))
-            # pass
-            # print("teste 12")
-            # print(Working)
+                # Estava a passar em cima e não sei bem pq 
+                status_config=Send_Config_to_Pic(next_execution)
+                if ini_file['DEFAULT']['DEBUG'] == "on":
+                    print(status_config)
 
     return ''
 
 if __name__ == "__main__":
-    print("[Starting] Experiment Server Starting...")
-    # global next_execution
     connected = None
     interface = importlib.import_module("pic_interface.interface")
+
+    print("Checking Version...")
+
     while True:
         try:
-            GetConfig()
-            print ("all good")
-            if interface.do_init(CONFIG_OF_EXP["config"],config_info['DEFAULT']['DEBUG']) :
-                print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
-                main_cycle()
+            Server_Version = VerifyVersionFREE()
+            if Server_Version == FREE_Version:
+                print("\nVersion match!!\n ")
+                print("[Starting] Experiment Server Starting...")
+                GetConfig()
+                print ("all good")
+                if interface.do_init(CONFIG_OF_EXP["config"],ini_file['DEFAULT']['DEBUG']) :
+                    print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
+                    MainCycle()
+                else:
+                    print ("Experiment not found")
             else:
-                print ("Experiment not found")
+                print("Proxy Version is "+FREE_Version+" and is diferent them FREE Server Version "+Server_Version)
         except:
             #LOG ERROR
             print("Faill to connect to the Server. Trying again after 10 s")
             #So faz shutdown do socket se este chegou a estar connected
             time.sleep(10)
-
-
-
-# global CONFIG_OF_EXP
-# global interface
-# interface = importlib.import_module("pic_interface.interface")
-# print("Recebi mensagem de configuracao. A tentar inicializar a experiencia\n")
-# CONFIG_OF_EXP = myjson['config_file']
-
-# #LIGAR A DISPOSITIVO EXP - INIT
-# #Talvez passar erros em forma de string JSON para incluir no reply em vez de OK e NOT OK
-# if interface.do_init(CONFIG_OF_EXP) :
-#     send('{"reply_id": "1", "status":"Experiment initialized OK"}')
-
-# else :
-#     send('{"reply_id": "1", "error":"-1", "status":"Experiment initialized NOT OK"}')
