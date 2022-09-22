@@ -34,12 +34,16 @@ HEADERS = {
   "Content-Type": "application/json"
 }
 
+api_protocol = 'http'
+if config_info['DEFAULT']['HTTPS']:
+    api_protocol = 'https'
+
 def SendInfoAboutExecution(id):
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
+    api_url = api_protocol+"://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/execution/"+str(id)+"/status"
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"})
+    response =  requests.patch(api_url, headers =HEADERS,json={"status": "R"}, verify=False)
     print(response)
     return ''
 
@@ -105,10 +109,10 @@ def Send_Config_to_Pic(myjson):
 # REST
 def GetConfig():
     global CONFIG_OF_EXP
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
+    api_url = api_protocol+"://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']
     # msg = {"secret":SEGREDO}
     print(api_url)
-    response =  requests.get(api_url, headers =HEADERS)
+    response =  requests.get(api_url, headers =HEADERS, verify=False)
     # print(response.json())
     print(response.json())
     CONFIG_OF_EXP = response.json()
@@ -118,8 +122,8 @@ def GetConfig():
 
 def GetExecution():
     global next_execution
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
-    response =  requests.get(api_url,headers = HEADERS)
+    api_url = api_protocol+"://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/apparatus/"+config_info['DEFAULT']['APPARATUS_ID']+"/nextexecution"
+    response =  requests.get(api_url,headers = HEADERS, verify=False)
     if (response.json()['protocol']['config'] !=None):
         print(response.json())
         next_execution = response.json()
@@ -133,13 +137,13 @@ def SendPartialResult(msg):
     global next_execution
     # print(next_execution)
     
-    api_url = "http://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
+    api_url = api_protocol+"://"+config_info['DEFAULT']['SERVER']+":"+config_info['DEFAULT']['PORT']+"/api/v1/result"
     if config_info['DEFAULT']['DEBUG'] == "on":
         print(str(msg))
         print(api_url)
         print("Aqui:  " ,json.dumps(msg,indent=4))
     
-    requests.post(api_url, headers = HEADERS, json=msg)
+    requests.post(api_url, headers = HEADERS, json=msg, verify=False)
     # Result_id = response.json()
     # if config_info['DEFAULT']['DEBUG'] == "on":
     #     print(json.dumps(Result_id,indent=4))   
