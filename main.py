@@ -80,7 +80,11 @@ class ComunicatedWithFREEServer:
     }
 
     def __init__(self,ini_file):
-        self.URL =  ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+self.API_Version
+        if ini_file['FREE']['HTTPS'] == True:
+            self.URL = "https://"
+        else:
+            self.URL = "http://"
+        self.URL += ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+self.API_Version
         self.Headers = { 
             "Authentication": str(ini_file['APPARATUS']['SECRET']), 
             "Content-Type": "application/json"

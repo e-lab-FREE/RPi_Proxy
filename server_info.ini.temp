@@ -1,7 +1,7 @@
 [DEFAULT]
 DEBUG = on 
 [FREE]
-PROTOCOL = <proto>
+HTTPS = True 
 SERVER = <ip_or_fqdn>
 PORT = <port>
 [APPARATUS]
