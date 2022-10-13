@@ -98,21 +98,21 @@ class ComunicatedWithFREEServer:
 
     def SendREQUEST(self,end_point,request_type,send_JSON={}):
         if ini_file['DEFAULT']['DEBUG'] == "on:":
-            print("#trying to send info to the "+self.URL)
+            print("trying to send info to the "+self.URL)
             if send_JSON.keys() != None:
                 print(str(send_JSON))
                 print("Sending JSON: \n\r" ,json.dumps(send_JSON,indent=4))
         else:
             pass
 
-        #try:
+        try:
             if request_type == "GET":
                 response = requests.get(self.URL+end_point,headers = self.Headers, verify=False)
             elif request_type == "POST":
                 response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False)
             elif request_type == "PATCH":
                 response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False)
-        #except:
+        except:
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
         
         if ini_file['DEFAULT']['DEBUG'] == "on":
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     print("Checking Version...")
     COMfree = ComunicatedWithFREEServer(ini_file)
     while True:
-        #try:
+        try:
             True_False, Server_Version = COMfree.VerifyVersionFREE()
             if True_False :
                 print("\nVersion match!!\n ")
@@ -289,8 +289,8 @@ if __name__ == "__main__":
                     print ("Experiment not found")
             else:
                 print("Proxy Version is "+COMfree.FREE_Version+" and is diferent them FREE Server Version "+Server_Version)
-        #except:
+        except:
             #LOG ERROR
-            print("Faill to connect to the Server. #trying again after 10 s")
+            print("Faill to connect to the Server. trying again after 10 s")
             #So faz shutdown do socket se este chegou a estar connected
             time.sleep(10)
