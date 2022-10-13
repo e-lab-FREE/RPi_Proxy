@@ -192,9 +192,9 @@ def send_exp_data(COMfree,next_execution):
         exp_data = interface.receive_data_from_exp()
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
-        #try:
+        try:
             exp_data = json.loads(exp_data)
-        #except:
+        except:
             pass
         if exp_data != "DATA_END":
             
