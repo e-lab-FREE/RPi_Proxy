@@ -258,7 +258,7 @@ def MainCycle(COMfree):
                 if test:
                     print("\n\nIsto_1 :")
                     print (next_execution)
-            time.sleep(0.5)
+            time.sleep(1)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
                 print("here") 
                 status_config=Send_Config_to_Pic(next_execution)
