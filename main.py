@@ -181,14 +181,14 @@ def SendResult(ComFREE,msg):
  ----- Comunications with the Experiment Apparatus -----
 '''
 
-def send_exp_data(next_execution):
+def send_exp_data(COMfree,next_execution):
     global SAVE_DATA
     global Working
     global lock
 
     while interface.receive_data_from_exp() != "DATA_START":
         pass
-    SendInfoAboutExecution(int(next_execution["id"]),"R")
+    SendInfoAboutExecution(COMfree,int(next_execution["id"]),"R")
     while True:
         exp_data = interface.receive_data_from_exp()
         if ini_file['DEFAULT']['DEBUG'] == "on":
@@ -201,10 +201,10 @@ def send_exp_data(next_execution):
             
             SAVE_DATA.append(exp_data)
             send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
-            SendResult(send_message)
+            SendResult(COMfree,send_message)
         else:
             send_message = {"execution":int(next_execution["id"]),"value":SAVE_DATA,"result_type":"f"}
-            SendResult(send_message)
+            SendResult(COMfree,send_message)
             Working = False
             next_execution = {}
             SAVE_DATA=[]
@@ -212,7 +212,7 @@ def send_exp_data(next_execution):
             return 
 
 
-def Send_Config_to_Pic(myjson):
+def Send_Config_to_Pic(COMfree,myjson):
     global Working
 
     print("Recebi mensagem de configurestart. A tentar configurar pic")
@@ -230,10 +230,10 @@ def Send_Config_to_Pic(myjson):
             #send_mensage = '{"reply_id": "2","status":"Experiment Running","config_params":"'+str(myjson["config_params"])+'}'
             # Working = True
         else :
-            SendInfoAboutExecution(myjson["id"],"E")
+            SendInfoAboutExecution(COMfree,myjson["id"],"E")
     
     else:
-        SendInfoAboutExecution(myjson["id"],"E")
+        SendInfoAboutExecution(COMfree,myjson["id"],"E")
     return ''
 
 
@@ -256,12 +256,11 @@ def MainCycle(COMfree):
                     print("Esta a passar pelo if none\n")
                 next_execution = GetExecution(COMfree)
                 if test:
-                    print("\n\nIsto_1 :")
                     print (next_execution)
             # time.sleep(1)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
                 print("here") 
-                status_config=Send_Config_to_Pic(next_execution)
+                status_config=Send_Config_to_Pic(COMfree,next_execution)
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print(status_config)
             else:
