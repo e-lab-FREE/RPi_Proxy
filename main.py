@@ -258,7 +258,7 @@ def MainCycle(COMfree):
                 if test:
                     print("\n\nIsto_1 :")
                     print (next_execution)
-            time.sleep(1)
+            # time.sleep(1)
             print("here") 
             print(next_execution["config"]!=None)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
