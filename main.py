@@ -220,7 +220,7 @@ def Send_Config_to_Pic(COMfree,myjson):
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
         print(myjson["id"])
         # SendInfoAboutExecution(myjson["id"],"R")
-        data_thread = threading.Thread(target=send_exp_data,args=(myjson,),daemon=True)
+        data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson,),daemon=True)
         print("PIC configurado.\n")
         if interface.do_start(): 
             Working = True
