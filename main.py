@@ -9,8 +9,6 @@ import serial
 import json
 import re
 
-from sqlalchemy import null
-
 
 '''
  Inport the information about the:
@@ -152,7 +150,7 @@ def GetExecution(ComFREE):
 
     response = ComFREE.SendREQUEST(api_url,"GET")
 
-    if (response.json()['protocol']['config'] !=null):
+    if (response.json()['protocol']['config'] !=None):
         print(response)
         next_execution = response
 
@@ -261,7 +259,10 @@ def MainCycle(COMfree):
                     print("\n\nIsto_1 :")
                     print (next_execution)
             time.sleep(1)
-            if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=null:
+            print("here") 
+            print(next_execution["config"]!=None)
+            if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
+                print("here") 
                 status_config=Send_Config_to_Pic(next_execution)
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print(status_config)
