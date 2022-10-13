@@ -260,10 +260,12 @@ def MainCycle(COMfree):
                     print (next_execution)
             time.sleep(0.5)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
-                # Estava a passar em cima e não sei bem pq 
+                print("here") 
                 status_config=Send_Config_to_Pic(next_execution)
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print(status_config)
+            else:
+                pass
 
     return ''
 
