@@ -48,7 +48,7 @@ ListOfEndpoints={
 
 
 CONFIG_OF_EXP = []
-# next_execution = {}
+next_execution = {}
 SAVE_DATA = []
 
 test =False
@@ -180,14 +180,15 @@ def SendResult(ComFREE,msg):
  ----- Comunications with the Experiment Apparatus -----
 '''
 
-def send_exp_data(COMfree,next_execution):
+def send_exp_data(COMfree,next_execution_id):
     global SAVE_DATA
     global Working
     global lock
+    global next_execution
 
     while interface.receive_data_from_exp() != "DATA_START":
         pass
-    SendInfoAboutExecution(COMfree,int(next_execution["id"]),"R")
+    SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
     while True:
         exp_data = interface.receive_data_from_exp()
         if ini_file['DEFAULT']['DEBUG'] == "on":
@@ -199,10 +200,10 @@ def send_exp_data(COMfree,next_execution):
         if exp_data != "DATA_END":
             
             SAVE_DATA.append(exp_data)
-            send_message = {"execution":int(next_execution["id"]),"value":exp_data,"result_type":"p"}#,"status":"running"}
+            send_message = {"execution":int(next_execution_id),"value":exp_data,"result_type":"p"}#,"status":"running"}
             SendResult(COMfree,send_message)
         else:
-            send_message = {"execution":int(next_execution["id"]),"value":SAVE_DATA,"result_type":"f"}
+            send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
             SendResult(COMfree,send_message)
             Working = False
             next_execution = {}
@@ -219,7 +220,7 @@ def Send_Config_to_Pic(COMfree,myjson):
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
         print(myjson["id"])
         # SendInfoAboutExecution(myjson["id"],"R")
-        data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson,),daemon=True)
+        data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson["id"],),daemon=True)
         print("PIC configurado.\n")
         if interface.do_start(): 
             Working = True
@@ -245,7 +246,7 @@ def Send_Config_to_Pic(COMfree,myjson):
 def MainCycle(COMfree):
     global CONFIG_OF_EXP
     global Working
-    next_execution = {}
+    global next_execution
 
     if CONFIG_OF_EXP != None:
         if ini_file['DEFAULT']['DEBUG'] == "on":
