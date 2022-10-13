@@ -243,7 +243,7 @@ def Send_Config_to_Pic(myjson):
 '''
 
 
-def MainCycle():
+def MainCycle(COMfree):
     global CONFIG_OF_EXP
     global Working
 
