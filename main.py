@@ -80,7 +80,7 @@ class ComunicatedWithFREEServer:
     }
 
     def __init__(self,ini_file):
-        if ini_file['FREE']['HTTPS'] == True:
+        if ini_file['FREE']['HTTPS']:
             self.URL = "https://"
         else:
             self.URL = "http://"
@@ -107,11 +107,11 @@ class ComunicatedWithFREEServer:
 
         try:
             if request_type == "GET":
-                response = requests.get(self.URL+end_point,headers = self.Headers)
+                response = requests.get(self.URL+end_point,headers = self.Headers, verify=False)
             elif request_type == "POST":
-                response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON)
+                response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False)
             elif request_type == "PATCH":
-                response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON)
+                response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False)
         except:
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
         
