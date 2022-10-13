@@ -150,8 +150,8 @@ def GetExecution(ComFREE):
 
     response = ComFREE.SendREQUEST(api_url,"GET")
 
-    if (response.json()['protocol']['config'] !=None):
-        print(response)
+    if (response['protocol']['config'] !=None):
+        print(json.dumps(response,indent=4))
         next_execution = response
 
     return next_execution
