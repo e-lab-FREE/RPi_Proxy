@@ -152,9 +152,8 @@ def GetExecution(ComFREE):
 
     if (response['protocol']['config'] !=None):
         print(json.dumps(response,indent=4))
-        next_execution = response
 
-    return next_execution
+    return response
 
 
 def SendInfoAboutExecution(ComFREE,id,info):
