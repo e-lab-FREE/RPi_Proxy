@@ -10,10 +10,12 @@ def msg_to_config_experiment(config_json):
         print("TODO: send error to server, pic is not conected")
         return False 
 
+
 def data_to_json(pic_message):
     return {"Sample_number":str(pic_message[0]),\
-            "Val1":str(pic_message[1]),\
-            "Val2":str(pic_message[2]),\
-            "Val3":str(pic_message[3]),\
-            "Val4":str(pic_message[4])}
+            "Period":str(pic_message[1]),\
+            # "g":str(pic_message[2]),\
+            "Velocity":str(pic_message[3]),\
+            "Temperature":str(pic_message[4])}
     
+
