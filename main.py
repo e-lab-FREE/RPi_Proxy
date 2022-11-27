@@ -51,6 +51,7 @@ CONFIG_OF_EXP = []
 next_execution = {}
 SAVE_DATA = []
 LIST_OF_TRUE= ['true','1','yes','y','t','https']
+time_check_execuition = 0.3 # sec == 300 ms
 
 test =False
 Working = False
@@ -253,6 +254,7 @@ def MainCycle(COMfree):
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
         while True:
+            time.sleep(time_check_execuition)
             if not Working:
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
