@@ -190,8 +190,9 @@ def send_exp_data(COMfree,next_execution_id):
     global next_execution
     global SEND_NT
     global partial_total
-
+    inte_send=0
     while interface.receive_data_from_exp() != "DATA_START":
+        inte_send=0
         pass
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
     while True:
@@ -205,7 +206,7 @@ def send_exp_data(COMfree,next_execution_id):
         if exp_data != "DATA_END":
             
             SAVE_DATA.append(exp_data)
-            if exp_data["adc_value3"] < 0.00001:
+            if float(exp_data["adc_value3"]) < 0.00001:
                 SEND_NT.append(exp_data)
                 inte_send = inte_send +1
                 if inte_send >= partial_total : # falta verificar que ja estamos na execução da sonda em si (não a fazer vacum)
