@@ -215,7 +215,9 @@ def send_exp_data(COMfree,next_execution_id):
                     SEND_NT = []
                     SendResult(COMfree,send_message)
             else:
-                send_message = {"execution":int(next_execution_id),"value":[].append(exp_data),"result_type":"p"}#,"status":"running"}
+                SEND_NT.append(exp_data)
+                send_message = {"execution":int(next_execution_id),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
+                SEND_NT = []
                 SendResult(COMfree,send_message)
         else:
             if SEND_NT != []:
