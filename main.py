@@ -51,6 +51,7 @@ CONFIG_OF_EXP = []
 next_execution = {}
 SAVE_DATA = []
 SEND_NT = []
+LIST_OF_TRUE= ['true','1','yes','y','t','https']
 
 partial_total = 20
 
@@ -83,7 +84,7 @@ class ComunicatedWithFREEServer:
     }
 
     def __init__(self,ini_file):
-        if ini_file['FREE']['HTTPS']:
+        if ini_file['FREE']['HTTPS'].lower() in LIST_OF_TRUE:
             self.URL = "https://"
         else:
             self.URL = "http://"
