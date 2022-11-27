@@ -275,6 +275,7 @@ def MainCycle(COMfree):
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
         while True:
+            time.sleep(0.3)
             if not Working:
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
