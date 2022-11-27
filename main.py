@@ -309,6 +309,7 @@ if __name__ == "__main__":
                 if interface.do_init(CONFIG_OF_EXP["config"],ini_file['DEFAULT']['DEBUG']) :
                     print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
                     MainCycle(COMfree)
+                    time.sleep(0.3)
                 else:
                     print ("Experiment not found")
             else:
