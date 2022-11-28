@@ -244,6 +244,8 @@ def Send_Config_to_Pic(COMfree,myjson):
         print(myjson["id"])
         # SendInfoAboutExecution(myjson["id"],"R")
         partial_total = int(int(myjson["config"]["sigperiod"])/int(myjson["config"]["numsamps"]))*300 # dt que o user pediu  * 300 ms de aquisição.
+        if partial_total == 0:
+            partial_total = 300
         data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson["id"],),daemon=True)
         print("PIC configurado.\n")
         if interface.do_start(): 
