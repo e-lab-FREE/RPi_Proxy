@@ -9,6 +9,8 @@ import serial
 import json
 import re
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 '''
  Inport the information about the:
