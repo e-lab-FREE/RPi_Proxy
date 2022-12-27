@@ -226,6 +226,7 @@ def send_exp_data(COMfree,config_exp):
     global Working
     global next_execution
     global lock
+
     while True:
         exp_data = interface.receive_data_from_exp(COMfree,config_exp)
         if exp_data == True:
@@ -239,6 +240,7 @@ def Send_Config_to_Pic(COMfree,myjson):
 
     print("Recebi mensagem de configurestart. A tentar configurar pic")
     actual_config, config_feita_correcta = interface.do_config(myjson)
+    COMfree.SendInfoAboutExecution(COMfree,myjson["id"],"R")
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
         print(myjson["id"])
         # SendInfoAboutExecution(myjson["id"],"R")
