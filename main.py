@@ -135,46 +135,83 @@ class ComunicatedWithFREEServer:
         else: 
             return False, response['version']
 
+    def GetConfig(self):
+        global CONFIG_OF_EXP
+
+        api_url = ListOfEndpoints['aparatus']['deflaut']
+
+        response = self.SendREQUEST(api_url,"GET")
+
+        CONFIG_OF_EXP = response
+
+        return ''
+
+    def GetExecution(self):
+
+        api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
+
+        response = self.SendREQUEST(api_url,"GET")
+
+        if (response['protocol']['config'] !=None):
+            print(json.dumps(response,indent=4))
+
+        return response
 
 
-def GetConfig(ComFREE):
-    global CONFIG_OF_EXP
+    def SendInfoAboutExecution(self,id,info):
 
-    api_url = ListOfEndpoints['aparatus']['deflaut']
+        api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+        
+        response = self.SendREQUEST(api_url,"PATCH",{"status": info})
 
-    response = ComFREE.SendREQUEST(api_url,"GET")
+        return ''
 
-    CONFIG_OF_EXP = response
+    def SendResult(self,msg):
 
-    return ''
-
-def GetExecution(ComFREE):
-
-    api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
-
-    response = ComFREE.SendREQUEST(api_url,"GET")
-
-    if (response['protocol']['config'] !=None):
-        print(json.dumps(response,indent=4))
-
-    return response
-
-
-def SendInfoAboutExecution(ComFREE,id,info):
-
-    api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+        api_url = ListOfEndpoints['result']
     
-    response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
+        self.SendREQUEST(api_url,"POST",msg)
 
-    return ''
+        return ''
 
-def SendResult(ComFREE,msg):
+# def GetConfig(ComFREE):
+#     global CONFIG_OF_EXP
 
-    api_url = ListOfEndpoints['result']
+#     api_url = ListOfEndpoints['aparatus']['deflaut']
+
+#     response = ComFREE.SendREQUEST(api_url,"GET")
+
+#     CONFIG_OF_EXP = response
+
+#     return ''
+
+# def GetExecution(ComFREE):
+
+#     api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
+
+#     response = ComFREE.SendREQUEST(api_url,"GET")
+
+#     if (response['protocol']['config'] !=None):
+#         print(json.dumps(response,indent=4))
+
+#     return response
+
+
+# def SendInfoAboutExecution(ComFREE,id,info):
+
+#     api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+    
+#     response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
+
+#     return ''
+
+# def SendResult(ComFREE,msg):
+
+#     api_url = ListOfEndpoints['result']
    
-    ComFREE.SendREQUEST(api_url,"POST",msg)
+#     ComFREE.SendREQUEST(api_url,"POST",msg)
 
-    return ''
+#     return ''
 
 
 
@@ -190,7 +227,7 @@ def send_exp_data(COMfree,config_exp):
     global next_execution
     global lock
     while True:
-        exp_data = interface.receive_data_from_exp(config,config_exp)
+        exp_data = interface.receive_data_from_exp(COMfree,config_exp)
         if exp_data == True:
             Working = False
             next_execution = {}
@@ -215,10 +252,10 @@ def Send_Config_to_Pic(COMfree,myjson):
             #send_mensage = '{"reply_id": "2","status":"Experiment Running","config_params":"'+str(myjson["config_params"])+'}'
             # Working = True
         else :
-            SendInfoAboutExecution(COMfree,myjson["id"],"E")
+            COMfree.SendInfoAboutExecution(myjson["id"],"E")
     
     else:
-        SendInfoAboutExecution(COMfree,myjson["id"],"E")
+        COMfree.SendInfoAboutExecution(myjson["id"],"E")
     return ''
 
 
@@ -241,7 +278,7 @@ def MainCycle(COMfree):
             if not Working:
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
-                next_execution = GetExecution(COMfree)
+                next_execution = COMfree.GetExecution()
                 if test:
                     print (next_execution)
             # time.sleep(1)
@@ -267,7 +304,7 @@ if __name__ == "__main__":
             if True_False :
                 print("\nVersion match!!\n ")
                 print("[Starting] Experiment Server Starting...")
-                GetConfig(COMfree)
+                COMfree.GetConfig()
                 print ("all good")
                 if interface.do_init(CONFIG_OF_EXP["config"],ini_file['DEFAULT']['DEBUG']) :
                     print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")

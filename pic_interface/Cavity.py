@@ -26,7 +26,7 @@ config_send = None
 exp_run = None
 SAVE_DATA = []
 
-def Mauser_pressure(conn,HEADERS,serial_pressure):
+def Mauser_pressure(COMfree,serial_pressure):
     global pressure
     global exp_run
     global SAVE_DATA
@@ -37,7 +37,8 @@ def Mauser_pressure(conn,HEADERS,serial_pressure):
         time.sleep(0.001)
         SAVE_DATA.append(send_message)
         send_message = {"execution": next_execution,"value":send_message,"result_type":"p"}#,"status":"running"}
-        send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+        # send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+        COMfree.SendResult(send_message)
     return
 
 
@@ -66,7 +67,7 @@ def Set_Up_Exp(pressure_ref,gas_select,gas_amount):
     GPIO.Inject_Gas(int(gas_select), gas_amount)
     return
 
-def Do_analise_Spec(conn,HEADERS,serial_arinst,strat, stop, step, itera):
+def Do_analise_Spec(COMfree,serial_arinst,strat, stop, step, itera):
     global pressure
     global SAVE_DATA
     freq = np.arange(strat, stop, step)
@@ -84,18 +85,18 @@ def Do_analise_Spec(conn,HEADERS,serial_arinst,strat, stop, step, itera):
         print(json.dumps(send_message, indent=4))
         SAVE_DATA.append(send_message)
         send_message = {"execution": next_execution,"value":send_message,"result_type":"p"}#,"status":"running"}
-        send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+        # COMfree
+        # send_data.SendPartialResult(conn,send_message)
+        COMfree.SendResult(send_message)
     return
     
 
 
-def Do_experiment(conn,HEADERS,config_info,id_exe,serial_pressure, serial_arinst,strat, stop, step, itera,back_ground,gas_pressure,gas_type,Discharge,Magnite_field):
+def Do_experiment(COMfree,id_exe,serial_pressure, serial_arinst,strat, stop, step, itera,back_ground,gas_pressure,gas_type,Discharge,Magnite_field):
     global next_execution
-    global config_send
     global exp_run
     global SAVE_DATA
     SAVE_DATA =[]
-    config_send = config_info
     next_execution = id_exe
     print("F_start: ", strat)
     print("F_end: ", stop)
@@ -105,7 +106,7 @@ def Do_experiment(conn,HEADERS,config_info,id_exe,serial_pressure, serial_arinst
     print("pressure: ",gas_pressure )
     print("gas_selector: ", gas_type)
     exp_run =True
-    data_thread = threading.Thread(target=Mauser_pressure,args=(conn,HEADERS,serial_pressure,),daemon=True)
+    data_thread = threading.Thread(target=Mauser_pressure,args=(COMfree,serial_pressure,),daemon=True)
     # arnist('/dev/ttyACM0', 3308000000, 3891000000, 500000, 4)
     data_thread.start()
     # Set Up experiment:
@@ -134,7 +135,7 @@ def Do_experiment(conn,HEADERS,config_info,id_exe,serial_pressure, serial_arinst
         time.sleep(0.1)
         GPIO.Magnite_on_stat(ON)
         time.sleep(2)
-    Do_analise_Spec(conn,HEADERS,serial_arinst, strat, stop, step, itera)
+    Do_analise_Spec(COMfree,serial_arinst, strat, stop, step, itera)
     time.sleep(5)
     if (Discharge == 1):
         GPIO.Discharge_stat(OFF)
@@ -146,6 +147,7 @@ def Do_experiment(conn,HEADERS,config_info,id_exe,serial_pressure, serial_arinst
     GPIO.Vacum_Pump_stat(OFF)
     exp_run =False
     send_message = {"execution":next_execution,"value":SAVE_DATA,"result_type":"f"}
-    send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+    # send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+    COMfree.SendResult(send_message)
     SAVE_DATA = []
     return True
