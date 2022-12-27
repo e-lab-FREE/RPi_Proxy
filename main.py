@@ -184,37 +184,18 @@ def SendResult(ComFREE,msg):
  ----- Comunications with the Experiment Apparatus -----
 '''
 
-def send_exp_data(COMfree,next_execution_id):
+def send_exp_data(COMfree,config_exp):
     global SAVE_DATA
     global Working
-    global lock
     global next_execution
-
-    while interface.receive_data_from_exp() != "DATA_START":
-        pass
-    SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
+    global lock
     while True:
-        exp_data = interface.receive_data_from_exp()
-        if ini_file['DEFAULT']['DEBUG'] == "on":
-            print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
-        try:
-            exp_data = json.loads(exp_data)
-        except:
-            pass
-        if exp_data != "DATA_END":
-            
-            SAVE_DATA.append(exp_data)
-            send_message = {"execution":int(next_execution_id),"value":exp_data,"result_type":"p"}#,"status":"running"}
-            SendResult(COMfree,send_message)
-        else:
-            send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
-            SendResult(COMfree,send_message)
+        exp_data = interface.receive_data_from_exp(config,config_exp)
+        if exp_data == True:
             Working = False
             next_execution = {}
-            SAVE_DATA=[]
             time.sleep(0.00001)
-            return 
-
+            return
 
 def Send_Config_to_Pic(COMfree,myjson):
     global Working
@@ -224,7 +205,7 @@ def Send_Config_to_Pic(COMfree,myjson):
     if config_feita_correcta :   #se config feita igual a pedida? (opcional?)
         print(myjson["id"])
         # SendInfoAboutExecution(myjson["id"],"R")
-        data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson["id"],),daemon=True)
+        data_thread = threading.Thread(target=send_exp_data,args=(COMfree,myjson,),daemon=True)
         print("PIC configurado.\n")
         if interface.do_start(): 
             Working = True
