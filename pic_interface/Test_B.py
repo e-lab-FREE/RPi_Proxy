@@ -58,7 +58,16 @@ if __name__ == "__main__":
         elif input_msg == 'OpAr':
             GPIO.Valve_cut_off_stat(ON)
             GPIO.Vacum_Pump_stat(ON)
-            GPIO.Inject_Gas(3, 10000)
+            GPIO.Inject_Gas(3, 14)
+        elif input_msg == 'on':
+            GPIO.Vacum_Pump_stat(ON)
+            GPIO.Discharge_stat(ON)
+        elif input_msg =='off':
+            GPIO.Discharge_stat(OFF)
+        elif input_msg == 'vac':
+            GPIO.Valve_cut_off_stat(ON)
+        elif input_msg == 'vacf':
+            GPIO.Valve_cut_off_stat(OFF)
 
         else:
             pass

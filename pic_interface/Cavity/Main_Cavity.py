@@ -24,7 +24,7 @@ OFF = 0
 
 pressure = 0
 serial_pressure = None
-Valve_cut_off = 13
+Valve_cut_off = 23
 Vacum_Pump=12
 Discharge=5
 Helio = 17

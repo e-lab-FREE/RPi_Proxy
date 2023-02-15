@@ -94,6 +94,7 @@ class ComunicatedWithFREEServer:
             "Content-Type": "application/json"
             }
         self.ExecutionConfig = 0
+        print(self.Headers )
         return
 
     def UpdateExecutionConfig(self):
@@ -108,6 +109,10 @@ class ComunicatedWithFREEServer:
                 print("Sending JSON: \n\r" ,json.dumps(send_JSON,indent=4))
         else:
             pass
+        try:
+            send_JSON=json.loads(send_JSON)
+        except:
+            pass
 
         try:
             if request_type == "GET":
@@ -116,11 +121,25 @@ class ComunicatedWithFREEServer:
                 response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False)
             elif request_type == "PATCH":
                 response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False)
-        except:
+            else:
+                print("error")
+                return "error"
+        except requests.exceptions.Timeout:
+    # Maybe set up for a retry, or continue in a retry loop
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
+        except requests.exceptions.TooManyRedirects:
+    # Tell the user their URL was bad and try a different one
+            print("TooManyRedirects")
+        except requests.exceptions.RequestException as e:
+    # catastrophic error. bail.
+            print("RequestException")
+            print(e)
         
         if ini_file['DEFAULT']['DEBUG'] == "on":
-            print(json.dumps(response.json(),indent=4))
+            try:
+                print(json.dumps(response.json(),indent=4))
+            except:
+                print(response)
 
         return response.json()
     

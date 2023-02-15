@@ -70,6 +70,7 @@ def Set_Up_Exp(pressure_ref,gas_select,gas_amount):
 def Do_analise_Spec(COMfree,serial_arinst,strat, stop, step, itera):
     global pressure
     global SAVE_DATA
+    global exp_run
     freq = np.arange(strat, stop, step)
     for l in range(0,itera):
         Arinst.act_generator(serial_arinst)
@@ -81,7 +82,7 @@ def Do_analise_Spec(COMfree,serial_arinst,strat, stop, step, itera):
         # print(len(freq))
         # print(freq[0])
         # print(freq[-1])
-        send_message = {"time":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),"pressure": pressure, "frequency": freq.tolist(), "magnitude": spec[1:]  }
+        send_message = {"time":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),"pressure": pressure,"frequency": freq.tolist(), "magnitude": spec[1:]}
         print(json.dumps(send_message, indent=4))
         SAVE_DATA.append(send_message)
         send_message = {"execution": next_execution,"value":send_message,"result_type":"p"}#,"status":"running"}
