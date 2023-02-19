@@ -1,9 +1,18 @@
 [DEFAULT]
 DEBUG = on 
+
 [FREE]
 HTTPS = True 
 SERVER = <ip_or_fqdn>
 PORT = <port>
+
+;  TIMOUT are in seconds 
+;  If you want the same timeout on connect and read mantein 
+; the TIMOUT_READ as None 
+;  WARNNING: Don't use timout lower them 3 seconds 
+TIMOUT_CONNECT = None
+TIMOUT_READ = None
+
 [APPARATUS]
 ID= ?
 SECRET = <supersecret>

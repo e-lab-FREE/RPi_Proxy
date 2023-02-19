@@ -1,6 +1,9 @@
+import os
+import pathlib
 import requests
 import json
 from datetime import datetime
+from datetime import date
 import importlib
 import threading
 import time
@@ -14,26 +17,37 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 '''
  Inport the information about the:
- [DEFAULT]  
+
+    [DEFAULT]
     DEBUG = on 
- [FREE]
-    SERVER = elab.vps.tecnico.ulisboa.pt
-    PORT = 8003
- [APPARATUS]
-    ID= 1
-    SECRET = super_secret
+
+    [FREE]
+    HTTPS = True 
+    SERVER = <ip_or_fqdn>
+    PORT = <port>
+
+    ;  TIMOUT are in seconds 
+    ;  If you want the same timeout on connect and read mantein 
+    ; the TIMOUT_READ as None 
+    ;  WARNNING: Don't use timout lower them 3 seconds 
+    TIMOUT_CONNECT = 15
+    TIMOUT_READ = None
+
+    [APPARATUS]
+    ID= ?
+    SECRET = <supersecret>
+    FORMAT = 'utf-8'
 
 '''
 
 # Prevent ConfigParser interpolation of values
-ini_file = configparser.ConfigParser(interpolation=None)
+ini_file = configparser.ConfigParser(interpolation = None)
 ini_file.read('server_info.ini')
 
 '''
 Comunication URL and Endpoints of FREE server
 '''
 
-# Base_URL = ini_file['FREE']['PROTOCOL']+"://"+ini_file['FREE']['SERVER']+":"+ini_file['FREE']['PORT']+"/api/"+API_Version
 ListOfEndpoints={
     
     "aparatus":   {
@@ -52,7 +66,10 @@ ListOfEndpoints={
 CONFIG_OF_EXP = []
 next_execution = {}
 SAVE_DATA = []
-LIST_OF_TRUE= ['true','1','yes','y','t','https']
+
+LIST_OF_TRUE = ['true','1','yes','y','t','https']
+LIST_OF_TIMEOUT_OFF = ['none','off','0','null']
+
 time_check_execuition = 0.3 # sec == 300 ms
 
 test =False
@@ -62,8 +79,22 @@ interface = None
 
 lock = threading.Lock()
 
+'''
+ ----- Write on the .log file -----
+'''
 
+LOGG_Level = ["OPERATION",\
+              "ERROR"\
+             ]
 
+def ReportLog(log_level,msg):
+    pathlib.Path(os.getcwd()+'/logs').mkdir(exist_ok=True) 
+    file_name = date.today().strftime("%d-%m-%Y")
+    file_path = os.getcwd()+'/logs/'+file_name+".log"
+    log = open(file_path, "a")
+    log.write(datetime.now().strftime("%H:%M:%S")+" ["+LOGG_Level[log_level]+"] - "+msg+"\n")
+    log.close()
+    return
 '''
  ----- Comunications with FREE SERVER -----
 '''
@@ -93,7 +124,17 @@ class ComunicatedWithFREEServer:
             "Authentication": str(ini_file['APPARATUS']['SECRET']), 
             "Content-Type": "application/json"
             }
+
         self.ExecutionConfig = 0
+
+        if ini_file['FREE']['TIMOUT_CONNECT'].lower() not in  LIST_OF_TIMEOUT_OFF:
+            if ini_file['FREE']['TIMOUT_READ'].lower() not in  LIST_OF_TIMEOUT_OFF:
+                self.time_out = (int(ini_file['FREE']['TIMOUT_CONNECT']),int(ini_file['FREE']['TIMOUT_READ']))
+            else:
+                self.time_out = int(ini_file['FREE']['TIMOUT_CONNECT'])
+        else:
+            self.time_out = None
+
         return
 
     def UpdateExecutionConfig(self):
@@ -111,13 +152,25 @@ class ComunicatedWithFREEServer:
 
         try:
             if request_type == "GET":
-                response = requests.get(self.URL+end_point,headers = self.Headers, verify=False)
+                response = requests.get(self.URL+end_point,headers = self.Headers, verify=False, timeout=self.time_out)
             elif request_type == "POST":
-                response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False)
+                response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False, timeout=self.time_out)
             elif request_type == "PATCH":
-                response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False)
-        except:
+                response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False, timeout=self.time_out)
+
+        except requests.exceptions.Timeout:
+            print("Time Out: "+ request_type+" With URL: "+self.URL+end_point)
+        except requests.exceptions.ConnectionError:
+            print("A Connection error occurred.")
+        except requests.exceptions.URLRequired:
+            print("A valid URL is required to make a request.")
+        except requests.exceptions.TooManyRedirects: 
+            print("Too many redirects.")
+        except requests.JSONDecodeError:
+            print("Couldn t decode the text into json")  
+        except requests.exceptions.RequestException as e:
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
+            print("An error occurred:", e)
         
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print(json.dumps(response.json(),indent=4))
@@ -134,7 +187,6 @@ class ComunicatedWithFREEServer:
             return  True, response['version']
         else: 
             return False, response['version']
-
 
 
 def GetConfig(ComFREE):
@@ -159,7 +211,6 @@ def GetExecution(ComFREE):
 
     return response
 
-
 def SendInfoAboutExecution(ComFREE,id,info):
 
     api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
@@ -175,9 +226,6 @@ def SendResult(ComFREE,msg):
     ComFREE.SendREQUEST(api_url,"POST",msg)
 
     return ''
-
-
-
 
 
 '''
