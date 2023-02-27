@@ -32,13 +32,13 @@ def try_to_lock_experiment(component, serial_port):
     #LOG_INFO
     if component == "pressure_gage":
         try:
-            print("checking: pressure_gage")
+            print("checking: pressure_gage PPT200")
             PPT200.get_pressure(serial_port)
             return True
         except:
             print("error: pressure_gage PPT200")
         try:
-            print("checking: pressure_gage")
+            print("checking: pressure_gage VSR53USB")
             VSR53USB.Pressure(serial_port)
             return True
         except:
