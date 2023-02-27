@@ -14,6 +14,7 @@ from datetime import datetime
 
 # sys.path.append('/home/pi/Cavidade/elab/webgpio/modules')
 import pic_interface.PPT200 as PPT200
+import pic_interface.VSR53USB as VSR53USB
 import pic_interface.Arinst as Arinst
 import pic_interface.GPIO as GPIO
 import pic_interface.Send_data as send_data
@@ -26,7 +27,7 @@ config_send = None
 exp_run = None
 SAVE_DATA = []
 
-def Mauser_pressure(COMfree,serial_pressure):
+def Mauser_pressure_old(COMfree,serial_pressure):
     global pressure
     global exp_run
     global SAVE_DATA
@@ -41,6 +42,20 @@ def Mauser_pressure(COMfree,serial_pressure):
         COMfree.SendResult(send_message)
     return
 
+def Mauser_pressure(COMfree,serial_pressure):
+    global pressure
+    global exp_run
+    global SAVE_DATA
+    while exp_run:
+        pressure = str(float(VSR53USB.Pressure(serial_pressure).decode('ascii')))
+        send_message = {"time":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]),"pressure": pressure}
+        print(json.dumps(send_message, indent=4))
+        time.sleep(0.001)
+        SAVE_DATA.append(send_message)
+        send_message = {"execution": next_execution,"value":send_message,"result_type":"p"}#,"status":"running"}
+        # send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
+        COMfree.SendResult(send_message)
+    return
 
 
 def Set_Up_Exp(pressure_ref,gas_select,gas_amount):

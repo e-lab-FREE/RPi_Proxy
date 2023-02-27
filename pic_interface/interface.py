@@ -5,6 +5,7 @@ import json
 import re
 
 import pic_interface.PPT200 as PPT200
+import pic_interface.VSR53USB as VSR53USB
 import pic_interface.Arinst as Arinst
 import pic_interface.GPIO as GPIO
 import pic_interface.Cavity as Cavity
@@ -35,7 +36,13 @@ def try_to_lock_experiment(component, serial_port):
             PPT200.get_pressure(serial_port)
             return True
         except:
-            print("error: pressure_gage")
+            print("error: pressure_gage PPT200")
+        try:
+            print("checking: pressure_gage")
+            VSR53USB.Pressure(serial_port)
+            return True
+        except:
+            print("error: pressure_gage VSR53USB")
             return False
     elif component == "arinst":
         try:  
