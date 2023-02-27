@@ -140,12 +140,23 @@ def main():
     VSR53.Read_Sensor_Transition()
     VSR53.Read_Gas_Correctoion()
 
+def Calculate_CS(send_to_head):
+    len_msg = 0
+    for char in send_to_head:
+        # print (ord(char))
+        len_msg += ord(char)
+    len_msg = (len_msg%64)+64
+    return chr(len_msg)
+
+
 def Pressure(serial_COM):
     AC = '0'
     CMD = 'MV'
     LEN = '00'
-    CS = VSR53USB.Calculate_CS(VSR53USB.ADR+AC+CMD+LEN)
-    msg = VSR53USB.ADR+AC+CMD+LEN+CS+VSR53USB.CR
+    ADR = '001'
+    CR = '\r'
+    CS = Calculate_CS(ADR+AC+CMD+LEN)
+    msg = ADR+AC+CMD+LEN+CS+CR
     
     serial_COM.write(msg.encode())
 
