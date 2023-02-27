@@ -1,0 +1,19 @@
+#!/bin/bash
+#variables matching information of FREE server
+video_server="localhost"
+video_port=6002
+apparatus_location="Lisboa"
+apparatus_name="pendulum"
+apparatus_id=1
+
+# font size
+font_size=25
+
+#local video configuration
+usb_camera=/dev/video0
+video_width=640
+video_height=480
+video_frame=15
+
+engine=ffmpeg
+#engine=gstream
