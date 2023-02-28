@@ -76,7 +76,7 @@ def Set_Up_Exp(pressure_ref,gas_select,gas_amount):
         time.sleep(1)
         if numero >max_time:
             break        
-    time.sleep(5)
+    time.sleep(0.1)
     # wait untly pressure is less them press_back
     GPIO.Valve_cut_off_stat(OFF)
     GPIO.Inject_Gas(int(gas_select), gas_amount)
