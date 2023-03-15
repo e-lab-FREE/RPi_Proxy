@@ -70,7 +70,7 @@ SAVE_DATA = []
 LIST_OF_TRUE = ['true','1','yes','y','t','https']
 LIST_OF_TIMEOUT_OFF = ['none','off','0','null']
 
-time_check_execuition = 0.3 # sec == 300 ms
+time_check_execuition = 5 # sec
 
 test =False
 Working = False
