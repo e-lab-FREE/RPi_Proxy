@@ -2,8 +2,7 @@ import os
 import pathlib
 import requests
 import json
-from datetime import datetime
-from datetime import date
+from datetime import datetime,date,timedelta
 import importlib
 import threading
 import time
@@ -66,6 +65,7 @@ ListOfEndpoints={
 CONFIG_OF_EXP = []
 next_execution = {}
 SAVE_DATA = []
+PARCIAL_DATA = []
 
 LIST_OF_TRUE = ['true','1','yes','y','t','https']
 LIST_OF_TIMEOUT_OFF = ['none','off','0','null']
@@ -79,22 +79,7 @@ interface = None
 
 lock = threading.Lock()
 
-'''
- ----- Write on the .log file -----
-'''
 
-LOGG_Level = ["OPERATION",\
-              "ERROR"\
-             ]
-
-def ReportLog(log_level,msg):
-    pathlib.Path(os.getcwd()+'/logs').mkdir(exist_ok=True) 
-    file_name = date.today().strftime("%d-%m-%Y")
-    file_path = os.getcwd()+'/logs/'+file_name+".log"
-    log = open(file_path, "a")
-    log.write(datetime.now().strftime("%H:%M:%S")+" ["+LOGG_Level[log_level]+"] - "+msg+"\n")
-    log.close()
-    return
 '''
  ----- Comunications with FREE SERVER -----
 '''
@@ -112,7 +97,12 @@ class ComunicatedWithFREEServer:
         },
         "result" : "/result",
         "version": "/version"
-    }
+    }    
+    LOGG_Level = ["OPERATION",\
+                  "SERIAL",\
+                  "HTTPS",\
+                  "ERROR"
+             ]
 
     def __init__(self,ini_file):
         if ini_file['FREE']['HTTPS'].lower() in LIST_OF_TRUE:
@@ -136,6 +126,17 @@ class ComunicatedWithFREEServer:
             self.time_out = None
 
         return
+    '''
+    ----- Write on the .log file -----
+    '''
+    def ReportLog(self,log_level,msg):
+        pathlib.Path(os.getcwd()+'/logs').mkdir(exist_ok=True) 
+        file_name = date.today().strftime("%d-%m-%Y")
+        file_path = os.getcwd()+'/logs/'+file_name+".log"
+        log = open(file_path, "a")
+        log.write(datetime.now().strftime("%H:%M:%S")+" ["+self.LOGG_Level[log_level]+"] - "+msg+"\n")
+        log.close()
+        return
 
     def UpdateExecutionConfig(self):
         
@@ -157,21 +158,26 @@ class ComunicatedWithFREEServer:
                 response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False, timeout=self.time_out)
             elif request_type == "PATCH":
                 response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False, timeout=self.time_out)
-
         except requests.exceptions.Timeout:
             print("Time Out: "+ request_type+" With URL: "+self.URL+end_point)
+            self.ReportLog(-1,"Time Out: "+ request_type+" With URL: "+self.URL+end_point)
         except requests.exceptions.ConnectionError:
             print("A Connection error occurred.")
+            self.ReportLog(-1,"A Connection error occurred.")
         except requests.exceptions.URLRequired:
             print("A valid URL is required to make a request.")
+            self.ReportLog(-1,"A valid URL is required to make a request.")
         except requests.exceptions.TooManyRedirects: 
             print("Too many redirects.")
+            self.ReportLog(-1,"Too many redirects.")
         except requests.JSONDecodeError:
-            print("Couldn t decode the text into json")  
+            print("Couldn t decode the text into json")
+            self.ReportLog(-1,"Couldn t decode the text into json")
         except requests.exceptions.RequestException as e:
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
             print("An error occurred:", e)
-        
+            self.ReportLog(-1,"An error occurred:", e)
+                      
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print(json.dumps(response.json(),indent=4))
 
@@ -237,7 +243,7 @@ def send_exp_data(COMfree,next_execution_id):
     global Working
     global lock
     global next_execution
-
+    time_last_send = datetime.datetime.now()
     while interface.receive_data_from_exp() != "DATA_START":
         pass
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
@@ -252,14 +258,19 @@ def send_exp_data(COMfree,next_execution_id):
         if exp_data != "DATA_END":
             
             SAVE_DATA.append(exp_data)
-            send_message = {"execution":int(next_execution_id),"value":exp_data,"result_type":"p"}#,"status":"running"}
-            SendResult(COMfree,send_message)
+            PARCIAL_DATA.append(exp_data)
+            if datetime.now() > time_last_send+timedelta(milliseconds=300):
+                send_message = {"execution":int(next_execution_id),"value":PARCIAL_DATA,"result_type":"p"}#,"status":"running"}
+                SendResult(COMfree,send_message)
+                PARCIAL_DATA = []
+                time_last_send =  datetime.datetime.now()
         else:
             send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
             SendResult(COMfree,send_message)
             Working = False
             next_execution = {}
             SAVE_DATA=[]
+            PARCIAL_DATA = []
             time.sleep(0.00001)
             return 
 
@@ -299,7 +310,7 @@ def MainCycle(COMfree):
     global CONFIG_OF_EXP
     global Working
     global next_execution
-
+    ReportLog(0,"Initiation of the MainCycle")
     if CONFIG_OF_EXP != None:
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
