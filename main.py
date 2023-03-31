@@ -150,7 +150,7 @@ class ComunicatedWithFREEServer:
             print("A Connection error occurred.")
             log.ReportLog(-1,"A Connection error occurred.")
         except requests.exceptions.URLRequired:
-            print("A valid URL is required to make a request.")return
+            print("A valid URL is required to make a request.")
             log.ReportLog(-1,"A valid URL is required to make a request.")
         except requests.exceptions.TooManyRedirects: 
             print("Too many redirects.")

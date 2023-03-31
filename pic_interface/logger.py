@@ -13,7 +13,7 @@ LOGG_Level = ["OPERATION",\
 ----- Write on the .log file -----
 '''
 
-def ReportLog(self,log_level,msg):
+def ReportLog(log_level,msg):
         pathlib.Path(os.getcwd()+'/logs').mkdir(exist_ok=True) 
         file_name = date.today().strftime("%d-%m-%Y")
         file_path = os.getcwd()+'/logs/'+file_name+".log"
