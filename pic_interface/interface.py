@@ -4,7 +4,7 @@ import serial
 import json
 import re
 import time
-import logger as log
+import pic_interface.logger as log
 
 import pic_interface.experiment_details as exp
 
@@ -17,9 +17,24 @@ def send_message_to_PIC(msg):
     try: 
         serial_port.reset_input_buffer()
         serial_port.write(b'\r')
+        msg = msg.encode(encoding='ascii')    
         serial_port.write(msg)
         serial_port.flush()
         return True
+    
+    # Char by Char 
+
+    # try:
+    #     serial_port.reset_input_buffer()
+    #     serial_port.write('\r'.encode('us-ascii'))
+    #     serial_port.flush()
+    #     for l in msg:
+    #         serial_port.write(l.encode('us-ascii'))
+    #         print(l)
+    #         serial_port.flush()
+    #     print(serial_port)
+    #     return True
+    
     except:
         print ("FATAL ERRO: Could not write on the serial PORT\n\r")
         log.ReportLog(-2,"Could not write on the serial PORT on the function send_message_to_PIC(msg)")
@@ -194,7 +209,6 @@ def do_start() :
     print("Try to start the experiment\n")
     
     cmd = "str\r"
-    cmd = cmd.encode(encoding='ascii')
     log.ReportLog(0,"Trying to strat the execution")
     send_message_to_PIC(cmd)
     while True :
@@ -220,7 +234,6 @@ def do_stop() :
     log.ReportLog(1, "Trying to STOP the experiment.")
     print("Try to stop the experiment\n")
     cmd = "stp\r"
-    cmd = cmd.encode(encoding='ascii')
     send_message_to_PIC(cmd)
     while True :
         try:
@@ -252,7 +265,6 @@ def do_reset() :
     global serial_port
     print("A tentar fazer reset da experiencia\n")
     cmd = "rst\r"
-    cmd = cmd.encode(encoding='ascii')
     log.ReportLog(1, "Trying to RESET the experiment.")
     send_message_to_PIC(cmd)
     while True :

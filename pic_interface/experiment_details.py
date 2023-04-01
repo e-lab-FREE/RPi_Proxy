@@ -1,7 +1,6 @@
 def msg_to_config_experiment(config_json):
     try:
         cmd ="cfg\t"+str(config_json["config"]["deltaX"])+"\t"+str(config_json["config"]["samples"])+"\r"
-        cmd = cmd.encode(encoding="ascii")
         return cmd 
     except:
         print("TODO: send error to server, pic is not conected")
