@@ -121,11 +121,10 @@ class VSR53USB:
 
     def Read_Sensor_Transition(self):
         AC = '0'
-        CMD = 'BR'
-        LEN = '06'
-        data = '115200'
-        CS = self.Calculate_CS(self.ADR+AC+CMD+LEN+data)
-        msg = self.ADR+AC+CMD+LEN+data+CS+self.CR
+        CMD = 'ST'
+        LEN = '00'
+        CS = self.Calculate_CS(self.ADR+AC+CMD+LEN)
+        msg = self.ADR+AC+CMD+LEN+CS+self.CR
         
         self.serial_COM.write(msg.encode())
         
@@ -136,7 +135,13 @@ class VSR53USB:
         AC = '2'
         CMD = 'ST'
         LEN = '00'
-        CS = self.Calculate_CS(self.ADR+AC+CMD+LEN)
+        data = '115200'
+        CS = self.Calculate_CS(self.ADR+AC+CMD+LEN+data)
+        msg = self.ADR+AC+CMD+LEN+data+CS+self.CR
+        
+        self.serial_COM.write(msg.encode())
+        
+        print(self.read_VSR53USB())
         return
 
 
@@ -149,7 +154,6 @@ def main():
     VSR53.Read_Sensor_Transition()
     VSR53.Read_Gas_Correctoion()
     VSR53.Change_Baud_rate()
-
 
 
 main()
