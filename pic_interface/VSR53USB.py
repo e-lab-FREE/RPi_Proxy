@@ -41,7 +41,7 @@ class VSR53USB:
         return  
 
     def int_VSR53USB(self,COM,Timeout):
-        serial_VSR53USB = serial.Serial(COM, timeout=Timeout,baudrate=115200)
+        serial_VSR53USB = serial.Serial(COM, timeout=Timeout)#,baudrate=115200)
         return serial_VSR53USB
        
 
@@ -153,9 +153,9 @@ def main():
     print(VSR53.Pressure())
     VSR53.Read_Sensor_Transition()
     VSR53.Read_Gas_Correctoion()
-    VSR53.Change_Baud_rate()
+    #VSR53.Change_Baud_rate()
     print(VSR53.Pressure())
 
 
-#main()
+main()
 
