@@ -309,9 +309,9 @@ def MainCycle(COMfree):
             # time.sleep(1)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
                 print("here") 
-                print("Gas_selector = "+str(next_execution["gas_selector"]))
+                print("Gas_selector = "+str(next_execution["config"]["gas_selector"]))
+                new_pressure_gauge.Adj_Gas_Correctoion_Factor(next_execution["config"]["gas_selector"])
                 status_config = Send_Config_to_Pic(COMfree,next_execution)
-                new_pressure_gauge.Adj_Gas_Correctoion_Factor(next_execution["gas_selector"])
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print(status_config)
             else:
