@@ -68,7 +68,8 @@ interface = None
 lock = threading.Lock()
 
 new_pressure_gauge = None
-
+new_pressure = 0
+EXP_RUNING = True
 #new_pressure = 0
 
 
@@ -192,9 +193,12 @@ def SendResult(ComFREE,msg):
  ----- Comunications with the Experiment Apparatus -----
 '''
 
-def read_pressure(VSR53):
-    while True:
-        new_pressure = float(VSR53.Pressure().decode('ascii'))*100
+def read_pressure():
+    global new_pressure
+    global new_pressure_gauge
+    global EXP_RUNING
+    while EXP_RUNING:
+        new_pressure = float(new_pressure_gauge.Pressure().decode('ascii'))
         time.sleep(0.001)
 
 def send_exp_data(COMfree,next_execution_id):
@@ -204,15 +208,16 @@ def send_exp_data(COMfree,next_execution_id):
     global next_execution
     global SEND_NT
     global partial_total
-    global new_pressure_gauge
+    global new_pressure
+    global EXP_RUNING
 
     inte_send=0
     while interface.receive_data_from_exp() != "DATA_START":
         inte_send=0
         pass
     #event = Event()
-    #pressure_thread = threading.Thread(target=read_pressure,args=(pressure_serial,),daemon=True)
-    #pressure_thread.start()
+    pressure_thread = threading.Thread(target=read_pressure,args=(),daemon=True)
+    pressure_thread.start()
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
     while True:
         exp_data = interface.receive_data_from_exp()
@@ -222,7 +227,10 @@ def send_exp_data(COMfree,next_execution_id):
             exp_data = json.loads(exp_data)
         except:
             pass
-        exp_data["new_pressure_gauge"] = float(new_pressure_gauge.Pressure().decode('ascii'))
+        try:
+            exp_data["new_pressure_gauge"] = new_pressure
+        except:
+            pass
         if exp_data != "DATA_END":
             
             SAVE_DATA.append(exp_data)
@@ -250,6 +258,7 @@ def send_exp_data(COMfree,next_execution_id):
             next_execution = {}
             SAVE_DATA=[]
             #event.set()
+            EXP_RUNING = False
             time.sleep(0.00001)
             return 
 
