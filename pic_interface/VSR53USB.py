@@ -41,7 +41,7 @@ class VSR53USB:
         return  
 
     def int_VSR53USB(self,COM,Timeout):
-        serial_VSR53USB = serial.Serial(COM, timeout=Timeout,baudrate=115200)
+        serial_VSR53USB = serial.Serial(COM, timeout=Timeout,baudrate=9600)
         return serial_VSR53USB
        
 
