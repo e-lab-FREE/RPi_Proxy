@@ -72,7 +72,7 @@ def receive_data_from_exp():
                 pic_message = exp.data_to_json(time_point,pic_message)
                 break
             except:
-                print("Mensagem em branco __ !!!!!!!!")
+                #print("Mensagem em branco __ !!!!!!!!")
                 pic_message = serial_port.read_until(b'\r')
                 pic_message = pic_message.decode(encoding='ascii')
                 pic_message = pic_message.strip()  ## 
