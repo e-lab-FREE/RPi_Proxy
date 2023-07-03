@@ -8,6 +8,7 @@ import configparser
 import serial
 import json
 import re
+import pic_interface.VSR53USB as VUSB
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -66,6 +67,7 @@ interface = None
 
 lock = threading.Lock()
 
+new_pressure_gauge = None
 
 #new_pressure = 0
 
@@ -202,6 +204,8 @@ def send_exp_data(COMfree,next_execution_id):
     global next_execution
     global SEND_NT
     global partial_total
+    global new_pressure_gauge
+
     inte_send=0
     while interface.receive_data_from_exp() != "DATA_START":
         inte_send=0
@@ -216,6 +220,7 @@ def send_exp_data(COMfree,next_execution_id):
             print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
         try:
             exp_data = json.loads(exp_data)
+            exp_data = float(new_pressure_gauge.decode('ascii'))
         except:
             pass
         if exp_data != "DATA_END":
@@ -288,6 +293,7 @@ def MainCycle(COMfree):
     global CONFIG_OF_EXP
     global Working
     global next_execution
+    global new_pressure_gauge
 
     if CONFIG_OF_EXP != None:
         if ini_file['DEFAULT']['DEBUG'] == "on":
@@ -303,7 +309,9 @@ def MainCycle(COMfree):
             # time.sleep(1)
             if ("config" in next_execution.keys()) and (not Working) and next_execution["config"]!=None:
                 print("here") 
-                status_config=Send_Config_to_Pic(COMfree,next_execution)
+                print("Gas_selector = "+str(next_execution["gas_selector"]))
+                status_config = Send_Config_to_Pic(COMfree,next_execution)
+                new_pressure_gauge.Adj_Gas_Correctoion_Factor(next_execution["gas_selector"])
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print(status_config)
             else:
@@ -326,6 +334,7 @@ if __name__ == "__main__":
                 GetConfig(COMfree)
                 print ("all good")
                 if interface.do_init(CONFIG_OF_EXP["config"],ini_file['DEFAULT']['DEBUG']) :
+                    new_pressure_gauge = VUSB.VSR53USB({"COM":'/dev/tty_pressure',"timeout":1})
                     print("Experiment "+CONFIG_OF_EXP["config"]['id']+" Online !!")
                     MainCycle(COMfree)
                     time.sleep(0.3)
