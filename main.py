@@ -9,6 +9,8 @@ import serial
 import json
 import re
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 '''
  Inport the information about the:
@@ -53,6 +55,8 @@ SAVE_DATA = []
 SEND_NT = []
 LIST_OF_TRUE= ['true','1','yes','y','t','https']
 
+time_check_execuition = 5 # sec
+
 partial_total = 20
 
 test =False
@@ -62,6 +66,8 @@ interface = None
 
 lock = threading.Lock()
 
+
+#new_pressure = 0
 
 
 '''
@@ -184,6 +190,11 @@ def SendResult(ComFREE,msg):
  ----- Comunications with the Experiment Apparatus -----
 '''
 
+def read_pressure(VSR53):
+    while True:
+        new_pressure = float(VSR53.Pressure().decode('ascii'))*100
+        time.sleep(0.001)
+
 def send_exp_data(COMfree,next_execution_id):
     global SAVE_DATA
     global Working
@@ -195,6 +206,9 @@ def send_exp_data(COMfree,next_execution_id):
     while interface.receive_data_from_exp() != "DATA_START":
         inte_send=0
         pass
+    #event = Event()
+    #pressure_thread = threading.Thread(target=read_pressure,args=(pressure_serial,),daemon=True)
+    #pressure_thread.start()
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
     while True:
         exp_data = interface.receive_data_from_exp()
@@ -225,11 +239,12 @@ def send_exp_data(COMfree,next_execution_id):
                 send_message = {"execution":int(next_execution_id),"value":SEND_NT,"result_type":"p"}#,"status":"running"}
                 SEND_NT = []
                 SendResult(COMfree,send_message)
-            send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
+            send_message = {"execution":int(next_execution_id),"value":[],"result_type":"f"}
             SendResult(COMfree,send_message)
             Working = False
             next_execution = {}
             SAVE_DATA=[]
+            #event.set()
             time.sleep(0.00001)
             return 
 
@@ -278,7 +293,7 @@ def MainCycle(COMfree):
         if ini_file['DEFAULT']['DEBUG'] == "on":
             print("Esta a passar pelo if none este\n")
         while True:
-            time.sleep(0.3)
+            time.sleep(time_check_execuition)
             if not Working:
                 if ini_file['DEFAULT']['DEBUG'] == "on":
                     print("Esta a passar pelo if none\n")
