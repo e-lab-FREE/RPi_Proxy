@@ -132,7 +132,7 @@ class VSR53USB:
         print(self.read_VSR53USB())
         return ''
     
-    def Change_Baud_rate():
+    def Change_Baud_rate(self):
         AC = '2'
         CMD = 'ST'
         LEN = '00'
@@ -148,8 +148,9 @@ def main():
     print(VSR53.Pressure())
     VSR53.Read_Sensor_Transition()
     VSR53.Read_Gas_Correctoion()
+    VSR53.Change_Baud_rate()
 
 
 
-#main()
+main()
 
