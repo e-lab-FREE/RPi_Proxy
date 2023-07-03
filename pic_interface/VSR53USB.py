@@ -134,7 +134,7 @@ class VSR53USB:
     def Change_Baud_rate(self):
         AC = '2'
         CMD = 'BR'
-        LEN = '00'
+        LEN = '06'
         data = '115200'
         CS = self.Calculate_CS(self.ADR+AC+CMD+LEN+data)
         msg = self.ADR+AC+CMD+LEN+data+CS+self.CR
