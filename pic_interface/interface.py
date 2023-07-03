@@ -55,9 +55,9 @@ def receive_data_from_exp():
         adc_Value2: current ( f(A) =  0.327324*adc_value2 + 36)  
         adc_Value3: pressure gauge value
         """
-        print("ENCONTREI INFO\nDADOS NA PORTA")
+        #print("ENCONTREI INFO\nDADOS NA PORTA")
         if pic_message == None:
-           print("Mensagem em branco !!!!!!!!")
+           #print("Mensagem em branco !!!!!!!!")
            pic_message = serial_port.read_until(b'\r')
            pic_message = pic_message.decode(encoding='ascii')
         

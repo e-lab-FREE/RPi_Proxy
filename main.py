@@ -220,7 +220,8 @@ def send_exp_data(COMfree,next_execution_id):
             print("What pic send on serial port (converted to json): ",json.dumps(exp_data,indent=4))
         try:
             exp_data = json.loads(exp_data)
-            exp_data["new_pressure_gauge"] = float(new_pressure_gauge.decode('ascii'))
+            print
+            exp_data["new_pressure_gauge"] = float(new_pressure_gauge.Pressure().decode('ascii'))
         except:
             pass
         if exp_data != "DATA_END":
