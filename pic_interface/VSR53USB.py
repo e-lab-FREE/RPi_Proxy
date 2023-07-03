@@ -154,6 +154,7 @@ def main():
     VSR53.Read_Sensor_Transition()
     VSR53.Read_Gas_Correctoion()
     VSR53.Change_Baud_rate()
+    print(VSR53.Pressure())
 
 
 main()
