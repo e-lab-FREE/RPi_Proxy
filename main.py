@@ -217,6 +217,7 @@ def send_exp_data(COMfree,next_execution_id):
         inte_send=0
         pass
     #event = Event()
+    EXP_RUNING = True
     pressure_thread = threading.Thread(target=read_pressure,args=(),daemon=True)
     pressure_thread.start()
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
