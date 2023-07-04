@@ -260,6 +260,7 @@ def send_exp_data(COMfree,next_execution_id):
             SAVE_DATA=[]
             #event.set()
             EXP_RUNING = False
+            interface.do_stop()
             time.sleep(0.00001)
             return 
 
