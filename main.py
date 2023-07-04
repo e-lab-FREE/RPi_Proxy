@@ -200,6 +200,7 @@ def read_pressure():
     while EXP_RUNING:
         new_pressure = float(new_pressure_gauge.Pressure().decode('ascii'))
         time.sleep(0.001)
+    return
 
 def send_exp_data(COMfree,next_execution_id):
     global SAVE_DATA
