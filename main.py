@@ -228,7 +228,7 @@ def send_exp_data(COMfree,next_execution_id):
         except:
             pass
         try:
-            exp_data["new_pressure_gauge"] = new_pressure
+            exp_data["new_pressure_gauge"] = round(new_pressure,2)
         except:
             pass
         if exp_data != "DATA_END":
