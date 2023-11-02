@@ -12,9 +12,13 @@ OFF = 0
 
 pressure = 0
 serial_pressure = None
-Valve_cut_off = 23  # will be 13 but for now is the 23 because we only have a valvu
-Vacum_Pump=12
-Discharge=5
+Valve_cut_off = 13  # will be 12 but for now is the 23 because we only have a valvu
+Vacum_Pump = 23
+
+Tomanda_energia = 12 # temporario ate substituir a comada com junções para uma normal
+#^ esta a controlar uma estenção que da energia ao campo magnetic e a discarga
+Discharge = 5
+Power_Of_Discharge = 20
 Helio = 17
 Argon = 22
 Xenon = 27
@@ -32,12 +36,35 @@ def Int_GPIO():
     GPIO.setup(Helio, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(Argon, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(Xenon, GPIO.OUT, initial=GPIO.HIGH)
-    
+
+    GPIO.setup(Tomanda_energia, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(Discharge, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(Power_Of_Discharge, GPIO.OUT, initial=GPIO.HIGH)
+
     GPIO.setup(Magnite_on, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(Magnite_1, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(Magnite_2, GPIO.OUT, initial=GPIO.HIGH)
     return True
+
+
+def Tomanda_energia_stat(ON_OFF):
+    if int(ON_OFF) == 1:
+        GPIO.output(Tomanda_energia, GPIO.LOW)
+    elif int(ON_OFF) == 0:
+        GPIO.output(Tomanda_energia, GPIO.HIGH)
+    else:
+        print("ERROR on the Discharge")
+    return
+
+
+def Power_Of_Discharge_stat(ON_OFF):
+    if int(ON_OFF) == 1:
+        GPIO.output(Power_Of_Discharge, GPIO.LOW)
+    elif int(ON_OFF) == 0:
+        GPIO.output(Power_Of_Discharge, GPIO.HIGH)
+    else:
+        print("ERROR on the Discharge")
+    return
 
 def Discharge_stat(ON_OFF):
     if int(ON_OFF) == 1:

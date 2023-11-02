@@ -25,7 +25,7 @@ def print_serial():
 
 def receive_data_from_exp(COMfree,config):
     global list_of_ports
-    return Cavity.Do_experiment(COMfree,config["id"],list_of_ports["pressure_gage"], list_of_ports["arinst"],config["config"]["f_strat"]*10**6, config["config"]["f_end"]*10**6, config["config"]["f_step"]*10**6, config["config"]["n_iteration"], config["config"]["back_pressure"]/100,config["config"]["pressure"],config["config"]["gas_selector"],config["config"]["discharge"],config["config"]["magnetic_field"])
+    return Cavity.Do_experiment(COMfree,config["id"],list_of_ports["pressure_gage"], list_of_ports["arinst"],config["config"]["f_start"]*10**6, config["config"]["f_end"]*10**6, config["config"]["f_step"]*10**6, config["config"]["n_iteration"], config["config"]["back_pressure"]/100,config["config"]["pressure"],config["config"]["gas_selector"],config["config"]["discharge"],config["config"]["magnetic_field"])
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(component, serial_port):
@@ -36,14 +36,14 @@ def try_to_lock_experiment(component, serial_port):
             PPT200.get_pressure(serial_port)
             return True
         except:
-            print("error: pressure_gage PPT200")
-        try:
-            print("checking: pressure_gage VSR53USB")
-            VSR53USB.Pressure(serial_port)
-            return True
-        except:
-            print("error: pressure_gage VSR53USB")
-            return False
+            #print("error: pressure_gage PPT200")
+            try:
+                print("checking: pressure_gage VSR53USB")
+                VSR53USB.Pressure(serial_port)
+                return True
+            except:
+                print("error: pressure_gage VSR53USB")
+                return False
     elif component == "arinst":
         try:  
             print("checking: arinst")

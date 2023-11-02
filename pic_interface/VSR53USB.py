@@ -7,6 +7,16 @@ TODO: Mudar isto para uma class
 
 import serial
 
+Ar = '1.6'
+He = '1.0'
+Ne = '1.4'
+N2 = '1.0'
+
+Data_Correction = { "3": Ar,
+                    "1": He,
+                    "2": N2
+}
+
 
 
 class VSR53USB:
@@ -23,13 +33,14 @@ class VSR53USB:
     Kr  |  2.4
 
     '''
-    Ar = '1.6' # 1
-    He = '1.0' # 2
-    Ne = '1.4' # 3
+    Ar = '1.6'
+    He = '1.0'
+    Ne = '1.4'
+    N2 = '1.0'
 
     Data_Correction = { "3": Ar,
                         "1": He,
-                        "2": Ne
+                        "2": N2
     }
 
 
@@ -163,3 +174,24 @@ def Pressure(serial_COM):
     read_pressor = serial_COM.read_until(b'\r')
     # print(read_pressor)
     return read_pressor[8:-2]
+
+
+def Correction(serial_COM, Gas_type):
+        AC = '2'
+        CMD = 'C1'
+        DATA = Data_Correction[str(Gas_type)]
+        LEN = str(len(DATA))
+        ADR = '001'
+        CR = '\r'
+        if len(LEN) == 1:
+            LEN = '0'+LEN
+        # print(LEN)
+        CS = Calculate_CS(ADR+AC+CMD+LEN+DATA)
+        msg = ADR+AC+CMD+LEN+DATA+CS+CR
+
+        serial_COM.write(msg.encode())
+        read_pressor = serial_COM.read_until(b'\r')
+        # print(read_pressor)
+        #print(serial_COM.read_VSR53USB())
+        return ''
+

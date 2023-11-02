@@ -53,7 +53,7 @@ CONFIG_OF_EXP = []
 next_execution = {}
 SAVE_DATA = []
 LIST_OF_TRUE= ['true','1','yes','y','t','https']
-time_check_execuition = 0.3 # sec == 300 ms
+time_check_execuition = 5 # sec
 
 test =False
 Working = False

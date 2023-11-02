@@ -61,10 +61,11 @@ def Mauser_pressure(COMfree,serial_pressure):
 def Set_Up_Exp(pressure_ref,gas_select,gas_amount):
     global pressure
     max_time = 2000
-    numero = 0 
+    numero = 0
     ligar = 1
+    GPIO.Tomanda_energia_stat(ON)
     GPIO.Vacum_Pump_stat(ON)
-    time.sleep(5)
+    time.sleep(2)
     while (float(pressure)>float(pressure_ref)):
         print("aqui: ",pressure)
         print("aqui: ",pressure_ref)
@@ -75,10 +76,12 @@ def Set_Up_Exp(pressure_ref,gas_select,gas_amount):
             ligar = 0
         time.sleep(1)
         if numero >max_time:
-            break        
+            break
     time.sleep(0.1)
     # wait untly pressure is less them press_back
     GPIO.Valve_cut_off_stat(OFF)
+    time.sleep(0.1)
+    GPIO.Vacum_Pump_stat(OFF)
     GPIO.Inject_Gas(int(gas_select), gas_amount)
     return
 
@@ -122,6 +125,8 @@ def Do_experiment(COMfree,id_exe,serial_pressure, serial_arinst,strat, stop, ste
     print("pressure: ",gas_pressure )
     print("gas_selector: ", gas_type)
     exp_run =True
+    VSR53USB.Correction(serial_pressure,gas_type)
+    time.sleep(0.1)
     data_thread = threading.Thread(target=Mauser_pressure,args=(COMfree,serial_pressure,),daemon=True)
     # arnist('/dev/ttyACM0', 3308000000, 3891000000, 500000, 4)
     data_thread.start()
@@ -129,9 +134,13 @@ def Do_experiment(COMfree,id_exe,serial_pressure, serial_arinst,strat, stop, ste
     
     Set_Up_Exp(back_ground,gas_type,gas_pressure)
     time.sleep(2)
-    if (Discharge == 1):
+    if (Discharge >= 1):
+        if (Discharge == 2):
+            GPIO.Power_Of_Discharge_stat(ON)
+            time.sleep(2)
+        else:
+            GPIO.Power_Of_Discharge_stat(OFF)
         GPIO.Discharge_stat(ON)
-    time.sleep(2)
     if (Magnite_field == 1):    
         GPIO.Magnite_on_stat(ON)
         time.sleep(5)
@@ -152,15 +161,21 @@ def Do_experiment(COMfree,id_exe,serial_pressure, serial_arinst,strat, stop, ste
         GPIO.Magnite_on_stat(ON)
         time.sleep(2)
     Do_analise_Spec(COMfree,serial_arinst, strat, stop, step, itera)
-    time.sleep(5)
-    if (Discharge == 1):
+    time.sleep(4)
+    if (Discharge >= 1):
         GPIO.Discharge_stat(OFF)
+        time.sleep(2)
+        GPIO.Power_Of_Discharge_stat(OFF)
     if (Magnite_field >= 1):    
         GPIO.Magnite_on_stat(OFF)
         time.sleep(2)
         GPIO.Magnite_1_stat(OFF)
         GPIO.Magnite_2_stat(OFF)
-    GPIO.Vacum_Pump_stat(OFF)
+    #____Temporario___
+    GPIO.Valve_cut_off_stat(OFF)
+    time.sleep(1)
+    #_________________
+    GPIO.Tomanda_energia_stat(OFF)
     exp_run =False
     send_message = {"execution":next_execution,"value":SAVE_DATA,"result_type":"f"}
     # send_data.SendPartialResult(conn,send_message,config_send,HEADERS)
