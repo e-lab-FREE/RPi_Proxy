@@ -197,7 +197,7 @@ def do_config(config_json) :
             print("all GOoD")
             log.ReportLog(0,"Found the return of the CFG: "+pic_message)
             return pic_message, True
-        elif re.search(r"(CONFIG_START_NOT_DONE\r){1}$",pic_message != None:
+        elif re.search(r"(CONFIG_START_NOT_DONE\r){1}$",pic_message) != None:
             log.ReportLog(-2,"Fail to configure the execution, not found the CFG return with the parrameters")
             return -1,False
     # status_confirmation = serial_port.read_until(b'\r')
