@@ -85,22 +85,23 @@ def try_to_lock_experiment(config_json, serial_port):
     try:
         pic_message = serial_port.read_until(b'\r')
         pic_message = pic_message.decode(encoding='ascii')
-        pic_message = pic_message.strip()
+        pic_message1 = serial_port.read_until(b'\r')
+        pic_message1 = pic_message1.decode(encoding='ascii')
         print("PIC MENSAGE:\n")
         print(pic_message)
+        print(pic_message1)
         print("\-------- --------/\n")
     except:
         print("TODO: send error to server, pic is not conected")
         log.ReportLog(-2,"Can not read a pic message, fail on try_to_lock_experiment(config_json, serial_port)")
 
-    match = re.search(r"(?P<exp_state>)$",pic_message)
     print(config_json['id'])
-    print(match.group("exp_name"))
-    if match.group("exp_name") == config_json['id']:
+    
+    if pic_message == config_json['id'] :
         #LOG_INFO
         print("PIC FOUND ON THE SERIAL PORT")
-        if match.group("exp_state") == "STOPED":
-            log.ReportLog(1,"Experiment locked and STOPED.")
+        if pic_message1 == "CONFIG_START_NOT_DONE":
+            log.ReportLog(1,"Experiment locked and CONFIG_START_NOT_DONE.")
             return True
         else:
             log.ReportLog(1,"Experiment with a diferent status them STOPED it was "+match.group("exp_name"))
@@ -110,10 +111,13 @@ def try_to_lock_experiment(config_json, serial_port):
             else:
                 return False
     else:
-        #LOG INFO
-        print("PIC NOT FOUND ON THE SERIAL PORT")
-        log.ReportLog(-2,"Wrong ID on the database.")
-        return False
+        if pic_message == "CONFIG_START_NOT_DONE":
+            log.ReportLog(1,"Experiment locked and CONFIG_START_NOT_DONE.")
+            return True
+        else:
+            print("PIC NOT FOUND ON THE SERIAL PORT")
+            log.ReportLog(-2,"Wrong ID on the database.")
+            return False
 
 #DO_INIT - Abre a ligacao com a porta serie
 #NOTAS: possivelmente os returns devem ser jsons com mensagens de erro
