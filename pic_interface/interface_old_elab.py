@@ -89,6 +89,8 @@ def try_to_lock_experiment(config_json, serial_port):
         pic_message1 = pic_message1.decode(encoding='ascii')
         print("PIC MENSAGE:\n")
         print(pic_message)
+        
+        print("PIC MENSAGE1:\n")
         print(pic_message1)
         print("\-------- --------/\n")
     except:
