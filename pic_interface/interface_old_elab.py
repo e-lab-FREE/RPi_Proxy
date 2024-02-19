@@ -191,8 +191,9 @@ def do_config(config_json) :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC DE CONFIG_START_ACCEPTED:\n")
         print(pic_message.decode(encoding='ascii'))
+        pic_message = pic_message.str()
         print("\-------- --------/\n")
-        if "CONFIG_START_ACCEPTED\r" in pic_message.decode(encoding='ascii') :
+        if "CONFIG_START_ACCEPTED" in pic_message.decode(encoding='ascii') :
             log.ReportLog(0,"Found the return of the CFG: "+pic_message)
             return pic_message, True
         elif re.search(r"(CONFIG_START_NOT_DONE\r){1}$",pic_message.decode(encoding='ascii')) != None:
