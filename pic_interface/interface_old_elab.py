@@ -10,6 +10,7 @@ import pic_interface.experiment_details as exp
 
 serial_port = None 
 dbuging = "off"
+EXP_NAME = ""
 #status, config
 
 def send_message_to_PIC(msg):
@@ -50,6 +51,7 @@ def print_serial():
             print(pic_message.strip())
 
 def receive_data_from_exp():
+    global EXP_NAME
     global serial_port
     if (dbuging == "on"):
         print("SEARCHING FOR INFO IN THE SERIE PORT\n")
@@ -67,7 +69,7 @@ def receive_data_from_exp():
         log.ReportLog(0,"Recived the DAT")
         print("INFO FOUND\nEXPERIMENTE STARTED")
         return "DATA_START"
-    elif pic_message in "CONFIG_START_NOT_DONE" :
+    elif pic_message in ["CONFIG_START_NOT_DONE",EXP_NAME] :
         log.ReportLog(0,"Recived the END")
         print("INFO FOUND\nEXPERIMENTE ENDED")
         return "DATA_END"
@@ -81,6 +83,7 @@ def receive_data_from_exp():
     
 #ALGURES AQUI HA BUG QUANDO NAO ESTA EM NENHUMA DAS PORTAS
 def try_to_lock_experiment(config_json, serial_port):
+    global EXP_NAME
     print("SEARCHING FOR THE PIC IN THE SERIE PORT")
     try:
         pic_message = serial_port.read_until(b'\r')
@@ -100,7 +103,7 @@ def try_to_lock_experiment(config_json, serial_port):
         log.ReportLog(-2,"Can not read a pic message, fail on try_to_lock_experiment(config_json, serial_port)")
 
     print(config_json['id'])
-    
+    EXP_NAME = config_json['id']
     if pic_message == config_json['id'] :
         #LOG_INFO
         print("1 - PIC FOUND ON THE SERIAL PORT")
