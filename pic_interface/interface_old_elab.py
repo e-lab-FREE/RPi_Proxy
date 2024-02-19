@@ -191,7 +191,7 @@ def do_config(config_json) :
         pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC DE CONFIG_START_ACCEPTED:\n")
         print(pic_message.decode(encoding='ascii'))
-        pic_message = pic_message.str()
+        pic_message = pic_message.decode(encoding='ascii').str()
         print("\-------- --------/\n")
         if "CONFIG_START_ACCEPTED" in pic_message.decode(encoding='ascii') :
             print("all GOoD")
