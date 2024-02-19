@@ -69,7 +69,7 @@ def receive_data_from_exp():
         log.ReportLog(0,"Recived the DAT")
         print("INFO FOUND\nEXPERIMENTE STARTED")
         return "DATA_START"
-    elif pic_message in ["CONFIG_START_NOT_DONE",EXP_NAME] :
+    elif pic_message.strip() in ["CONFIG_START_NOT_DONE",EXP_NAME] :
         log.ReportLog(0,"Recived the END")
         print("INFO FOUND\nEXPERIMENTE ENDED")
         return "DATA_END"
