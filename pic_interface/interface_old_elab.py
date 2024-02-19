@@ -93,7 +93,7 @@ def try_to_lock_experiment(config_json, serial_port):
         print("TODO: send error to server, pic is not conected")
         log.ReportLog(-2,"Can not read a pic message, fail on try_to_lock_experiment(config_json, serial_port)")
 
-    match = re.search(r"(?P<exp_state>+)$",pic_message)
+    match = re.search(r"(?P<exp_state>)$",pic_message)
     print(config_json['id'])
     print(match.group("exp_name"))
     if match.group("exp_name") == config_json['id']:
