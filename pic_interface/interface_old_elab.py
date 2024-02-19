@@ -85,7 +85,7 @@ def try_to_lock_experiment(config_json, serial_port):
     try:
         pic_message = serial_port.read_until(b'\r')
         pic_message = pic_message.decode(encoding='ascii')
-        pic_message1 = serial_port.read_until(b'\r')
+        pic_message1 = serial_port.read_until(b'\n\r')
         pic_message1 = pic_message1.decode(encoding='ascii')
         print("PIC MENSAGE:\n")
         print(pic_message)
@@ -101,7 +101,7 @@ def try_to_lock_experiment(config_json, serial_port):
     
     if pic_message == config_json['id'] :
         #LOG_INFO
-        print("PIC FOUND ON THE SERIAL PORT")
+        print("1 - PIC FOUND ON THE SERIAL PORT")
         if pic_message1 == "CONFIG_START_NOT_DONE":
             log.ReportLog(1,"Experiment locked and CONFIG_START_NOT_DONE.")
             return True
@@ -113,6 +113,7 @@ def try_to_lock_experiment(config_json, serial_port):
             else:
                 return False
     else:
+        print("2 - PIC FOUND ON THE SERIAL PORT")
         if pic_message == "CONFIG_START_NOT_DONE":
             log.ReportLog(1,"Experiment locked and CONFIG_START_NOT_DONE.")
             return True
