@@ -63,11 +63,11 @@ def receive_data_from_exp():
         print("MENSAGE FORM PIC:\n")
         print(pic_message)
         print("\-------- --------/\n")
-    if "DAT" in pic_message:
+    if "STARTED" in pic_message:
         log.ReportLog(0,"Recived the DAT")
         print("INFO FOUND\nEXPERIMENTE STARTED")
         return "DATA_START"
-    elif "END" in pic_message:
+    elif pic_message in "CONFIG_START_NOT_DONE" :
         log.ReportLog(0,"Recived the END")
         print("INFO FOUND\nEXPERIMENTE ENDED")
         return "DATA_END"
@@ -188,51 +188,47 @@ def do_config(config_json) :
     print("A tentar configurar experiência")
     while True :
         pic_message = serial_port.read_until(b'\r')
-        print("MENSAGEM DO PIC DE CONFIGURACAO:\n")
+        print("MENSAGEM DO PIC DE CONFIG_START_ACCEPTED:\n")
         print(pic_message.decode(encoding='ascii'))
         print("\-------- --------/\n")
-        if "CFG" in pic_message.decode(encoding='ascii') :
-            pic_message = pic_message.decode(encoding='ascii')
-            #Remover os primeiros 4 caracteres para tirar o "CFG\t" 
-            pic_message = pic_message[4:]
-            pic_message = pic_message.replace("\t"," ")
+        if "CONFIG_START_ACCEPTED" in pic_message.decode(encoding='ascii') :
             log.ReportLog(0,"Found the return of the CFG: "+pic_message)
-            break
-        elif re.search(r"(STOPED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+            return pic_message, True
+        elif re.search(r"(CONFIG_START_NOT_DONE){1}$",pic_message.decode(encoding='ascii')) != None:
             log.ReportLog(-2,"Fail to configure the execution, not found the CFG return with the parrameters")
             return -1,False
-    status_confirmation = serial_port.read_until(b'\r')
-    status_confirmation = status_confirmation.decode(encoding='ascii')
-    print("MENSAGEM DO PIC A CONFIRMAR CFGOK:\n")
-    print(status_confirmation)
-    print("\-------- --------/\n")
-    if "CFGOK" in status_confirmation:
-        log.ReportLog(0,"Found the return of the CFGOK")
-        return pic_message, True
-    else:
-        log.ReportLog(-2,"Fail to find the CFGOK")
-        return -1, False
+    # status_confirmation = serial_port.read_until(b'\r')
+    # status_confirmation = status_confirmation.decode(encoding='ascii')
+    # print("MENSAGEM DO PIC A CONFIRMAR STARTED:\n")
+    # print(status_confirmation)
+    # print("\-------- --------/\n")
+    # if "STARTED" in status_confirmation:
+    #     log.ReportLog(0,"Found the return of the STARTED")
+    #     return pic_message, True   
+    # else:
+    #     log.ReportLog(-2,"Fail to find the STARTED")
+    #     return -1, False
 
 def do_start() :
     global serial_port
 
-    print("Try to start the experiment\n")
+    # print("Try to start the experiment\n")
     
-    cmd = "str\r"
-    log.ReportLog(0,"Trying to strat the execution")
-    send_message_to_PIC(cmd)
-    while True :
-        pic_message = serial_port.read_until(b'\r')
-        print("MENSAGEM DO PIC A CONFIRMAR STROK:\n")
-        print(pic_message.decode(encoding='ascii'))
-        print("\-------- --------/\n")
-        if "STROK" in pic_message.decode(encoding='ascii') :
-            log.ReportLog(0,"Found the return of the STROK")
-            return True
-        elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
-            # print("OOOO")
-            return False
-        
+    # cmd = "str\r"
+    # log.ReportLog(0,"Trying to strat the execution")
+    # send_message_to_PIC(cmd)
+    # while True :
+    #     pic_message = serial_port.read_until(b'\r')
+    #     print("MENSAGEM DO PIC A CONFIRMAR STROK:\n")
+    #     print(pic_message.decode(encoding='ascii'))
+    #     print("\-------- --------/\n")
+    #     if "STROK" in pic_message.decode(encoding='ascii') :
+    #         log.ReportLog(0,"Found the return of the STROK")
+    #         return True
+    #     elif re.search(r"(STOPED|CONFIGURED|RESETED){1}$",pic_message.decode(encoding='ascii')) != None:
+    #         # print("OOOO")
+    #         return False
+    return True
         #elif "STOPED" or "CONFIGURED" or "RESETED" in pic_message.decode(encoding='ascii') :
         #    return False
         #Aqui não pode ter else: false senão rebenta por tudo e por nada
