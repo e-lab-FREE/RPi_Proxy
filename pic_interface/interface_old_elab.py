@@ -147,6 +147,7 @@ def do_init(config_json,dbug):
                 pass
             else:
                 if try_to_lock_experiment(config_json, serial_port) :
+                    print("all good")
                     break
                 else:
                     serial_port.close()
