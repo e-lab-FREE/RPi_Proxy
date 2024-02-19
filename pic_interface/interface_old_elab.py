@@ -188,6 +188,7 @@ def do_config(config_json) :
     print("A tentar configurar experiência")
     while True :
         pic_message = serial_port.read_until(b'\r')
+        pic_message = serial_port.read_until(b'\r')
         print("MENSAGEM DO PIC DE CONFIG_START_ACCEPTED:\n")
         print(pic_message.decode(encoding='ascii'))
         print("\-------- --------/\n")
