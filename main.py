@@ -72,6 +72,7 @@ LIST_OF_TRUE = ['true','1','yes','y','t','https']
 LIST_OF_TIMEOUT_OFF = ['none','off','0','null']
 
 time_check_execuition = 5 # sec
+total_net_try = 20
 
 test =False
 Working = False
@@ -143,6 +144,12 @@ class ComunicatedWithFREEServer:
                 response = requests.post(self.URL+end_point, headers = self.Headers, json=send_JSON, verify=False, timeout=self.time_out)
             elif request_type == "PATCH":
                 response = requests.patch(self.URL+end_point, headers =self.Headers,json=send_JSON, verify=False, timeout=self.time_out)
+            
+            
+            if ini_file['DEFAULT']['DEBUG'] == "on":
+                print(json.dumps(response.json(),indent=4))
+            return response.json()
+
         except requests.exceptions.Timeout:
             print("Time Out: "+ request_type+" With URL: "+self.URL+end_point)
             log.ReportLog(-1,"Time Out: "+ request_type+" With URL: "+self.URL+end_point)
@@ -162,11 +169,7 @@ class ComunicatedWithFREEServer:
             print("ERROR: Fail to comunicated: "+ request_type+" With URL: "+self.URL+end_point)
             print("An error occurred:", e)
             log.ReportLog(-1,"An error occurred:", e)
-                      
-        if ini_file['DEFAULT']['DEBUG'] == "on":
-            print(json.dumps(response.json(),indent=4))
-
-        return response.json()
+        return False           
     
     def VerifyVersionFREE(self):
 
@@ -177,7 +180,7 @@ class ComunicatedWithFREEServer:
         if response['version'] == self.FREE_Version:
             return  True, response['version']
         else: 
-            return False, response['version']
+            return False, "Error getting version"
 
 
 def GetConfig(ComFREE):
@@ -186,37 +189,43 @@ def GetConfig(ComFREE):
     api_url = ListOfEndpoints['aparatus']['deflaut']
 
     response = ComFREE.SendREQUEST(api_url,"GET")
-
-    CONFIG_OF_EXP = response
-
-    return ''
+    if response != False:
+        CONFIG_OF_EXP = response
+        return True
+    else:
+        return False
 
 def GetExecution(ComFREE):
 
     api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
 
     response = ComFREE.SendREQUEST(api_url,"GET")
+    if response != False:
+        if (response['protocol']['config'] !=None):
+            print(json.dumps(response,indent=4))
 
-    if (response['protocol']['config'] !=None):
-        print(json.dumps(response,indent=4))
-
-    return response
+        return response
+    else:
+        return False
 
 def SendInfoAboutExecution(ComFREE,id,info):
 
     api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
-    
-    response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
-
-    return ''
+    if response != False:    
+        response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
+        return True
+    else:
+        return False
 
 def SendResult(ComFREE,msg):
 
     api_url = ListOfEndpoints['result']
-   
-    ComFREE.SendREQUEST(api_url,"POST",msg)
+    response = ComFREE.SendREQUEST(api_url,"POST",msg)
 
-    return ''
+    if response != False:
+        return True
+    else:
+        return False
 
 
 '''
@@ -233,6 +242,7 @@ def send_exp_data(COMfree,next_execution_id):
     while interface.receive_data_from_exp() != "DATA_START":
         pass
     SendInfoAboutExecution(COMfree,int(next_execution_id),"R")
+    net_try = 0
     while True:
         exp_data = interface.receive_data_from_exp()
         if ini_file['DEFAULT']['DEBUG'] == "on":
@@ -247,18 +257,33 @@ def send_exp_data(COMfree,next_execution_id):
             PARCIAL_DATA.append(exp_data)
             if datetime.now() > time_last_send+timedelta(milliseconds=300):
                 send_message = {"execution":int(next_execution_id),"value":PARCIAL_DATA,"result_type":"p"}#,"status":"running"}
-                SendResult(COMfree,send_message)
-                PARCIAL_DATA = []
+                if SendResult(COMfree,send_message)==True:
+                    PARCIAL_DATA = []
+                    net_try = 0
+                else:
+                    net_try += 1
                 time_last_send =  datetime.now()
         else:
-            send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
-            SendResult(COMfree,send_message)
-            Working = False
-            next_execution = {}
-            SAVE_DATA=[]
-            PARCIAL_DATA = []
-            time.sleep(0.00001)
-            return 
+            if PARCIAL_DATA != None: 
+                send_message = {"execution":int(next_execution_id),"value":PARCIAL_DATA,"result_type":"p"}#,"status":"running"}
+                if SendResult(COMfree,send_message)==True :
+                    PARCIAL_DATA = []
+                    net_try = 0
+                else:
+                    net_try += 1
+                if net_try == total_net_try:
+                    log.ReportLog(-1,"Total submition tries meet and fail: "+str(total_net_try))
+                    SendInfoAboutExecution(COMfree,int(next_execution_id),"T")
+                    return
+            else:
+                send_message = {"execution":int(next_execution_id),"value":SAVE_DATA,"result_type":"f"}
+                SendResult(COMfree,send_message)
+                Working = False
+                next_execution = {}
+                SAVE_DATA=[]
+                PARCIAL_DATA = []
+                time.sleep(0.00001)
+                return 
 
 
 def Send_Config_to_Pic(COMfree,myjson):
