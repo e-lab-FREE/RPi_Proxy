@@ -2,7 +2,7 @@ import sys
 import serial
 import numpy as np
 import json
-import pandas as pd
+#import pandas as pd
 import configparser
 
 from datetime import datetime
