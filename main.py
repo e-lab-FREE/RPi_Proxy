@@ -52,11 +52,11 @@ Comunication URL and Endpoints of FREE server
 ListOfEndpoints={
     
     "aparatus":   {
-        "deflaut" : "/apparatus/"+ini_file['APPARATUS']['ID'],
+        "default" : "/apparatus/"+ini_file['APPARATUS']['ID'],
         "next": "/nextexecution",            
     },
     "execution" : { 
-        "deflaut" :"/execution/",
+        "default" :"/execution/",
         "status" : "/status"
     },
     "result" : "/result",
@@ -90,11 +90,11 @@ class ComunicatedWithFREEServer:
     API_Version = "v1"
     ListOfEndpoints={
         "aparatus":   {
-            "deflaut" : "/apparatus/"+ini_file['APPARATUS']['ID'],
+            "default" : "/apparatus/"+ini_file['APPARATUS']['ID'],
             "next": "/nextexecution",            
         },
         "execution" : { 
-            "deflaut" :"/execution/",
+            "default" :"/execution/",
             "status" : "/status"
         },
         "result" : "/result",
@@ -186,7 +186,7 @@ class ComunicatedWithFREEServer:
 def GetConfig(ComFREE):
     global CONFIG_OF_EXP
 
-    api_url = ListOfEndpoints['aparatus']['deflaut']
+    api_url = ListOfEndpoints['aparatus']['default']
 
     response = ComFREE.SendREQUEST(api_url,"GET")
     if response != False:
@@ -197,7 +197,7 @@ def GetConfig(ComFREE):
 
 def GetExecution(ComFREE):
 
-    api_url = ListOfEndpoints['aparatus']['deflaut']+ListOfEndpoints['aparatus']['next']
+    api_url = ListOfEndpoints['aparatus']['default']+ListOfEndpoints['aparatus']['next']
 
     response = ComFREE.SendREQUEST(api_url,"GET")
     if response != False:
@@ -210,7 +210,7 @@ def GetExecution(ComFREE):
 
 def SendInfoAboutExecution(ComFREE,id,info):
 
-    api_url = ListOfEndpoints['execution']['deflaut']+str(id)+ListOfEndpoints['execution']['status']
+    api_url = ListOfEndpoints['execution']['default']+str(id)+ListOfEndpoints['execution']['status']
     if response != False:    
         response = ComFREE.SendREQUEST(api_url,"PATCH",{"status": info})
         return True
